@@ -2,12 +2,14 @@ package easyLearning;
 
 import net.sf.javaml.clustering.*;
 import net.sf.javaml.clustering.evaluation.*;
+import net.sf.javaml.clustering.mcl.MCL;
 import net.sf.javaml.distance.DistanceMeasure;
 
 public class ClustererFactory {
     private static ClustererFactory instance = null;
     private ClusterEvaluation ce = null;
     private DistanceMeasure dm = null;
+    private int clusters = -1;
 
     private ClustererFactory() {
         ce = new SumOfSquaredErrors();
@@ -20,20 +22,48 @@ public class ClustererFactory {
         return instance;
     }
 
-    public Clusterer createClusterer(String clustererType) {
+    public void setClusterSize(int clusters) {
+        this.clusters = clusters;
+    }
+
+    public Clusterer createClusterer(String clustererType) throws NullPointerException {
         switch (clustererType) {
             case "KMeans":
-                return new KMeans();
+                if(this.clusters == -1) {
+                    System.out.println("Set cluster size first!");
+                    throw new NullPointerException();
+                }
+                return new KMeans(this.clusters);
             case "KMedoids":
-                return new KMedoids();
+                if(this.clusters == -1) {
+                    System.out.println("Set cluster size first!");
+                    throw new NullPointerException();
+                } else if (this.dm == null) {
+                    System.out.println("Set distance measure first!");
+                    throw new NullPointerException();
+                }
+                return new KMedoids(this.clusters, 10000, dm);
             case "FarthestFirst":
-                return new FarthestFirst();
+                if(this.clusters == -1) {
+                    System.out.println("Set cluster size first!");
+                    throw new NullPointerException();
+                } else if (this.dm == null) {
+                    System.out.println("Set distance measure first!");
+                    throw new NullPointerException();
+                }
+                return new FarthestFirst(this.clusters, dm);
             case "Cobweb":
                 return new Cobweb();
             case "AQBC":
                 return new AQBC();
             case "DensityBasedSpatial":
                 return new DensityBasedSpatialClustering();
+            case "MCL":
+                if (this.dm == null) {
+                    System.out.println("Set distance measure first!");
+                    throw new NullPointerException();
+                }
+                return new MCL(dm);
         }
         return null;
     }
@@ -119,7 +149,7 @@ public class ClustererFactory {
         return this.ce;
     }
 
-    private void setDistanceMeasure(DistanceMeasure dm) {
+    public void setDistanceMeasure(DistanceMeasure dm) {
         this.dm = dm;
     }
 }

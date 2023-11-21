@@ -6,6 +6,7 @@ import com.holub.text.ParseFailure;
 import com.holub.text.Scanner;
 import com.holub.text.TokenSet;
 import easyLearning.ClustererFactory;
+import easyLearning.DistanceMeasureFactory;
 import net.sf.javaml.classification.Classifier;
 import net.sf.javaml.classification.KNearestNeighbors;
 import net.sf.javaml.classification.evaluation.CrossValidation;
@@ -130,20 +131,34 @@ public class Main {
              * clusters and create one that will make 4 clusters.
              */
             ClustererFactory factory = ClustererFactory.getInstance();
-            Clusterer clusterer = factory.createClusterer("KMeans");
+            DistanceMeasureFactory distanceMeasureFactory = DistanceMeasureFactory.getInstance();
+            factory.setDistanceMeasure(distanceMeasureFactory.createDistanceMeasure("EuclideanDistance"));
+            factory.setClusterSize(3);
+            Clusterer clusterer3 = factory.createClusterer("KMeans");
+            factory.setClusterSize(4);
+            Clusterer clusterer4 = factory.createClusterer("KMeans");
             /*
              * Cluster the data, we will create 3 and 4 clusters.
              */
-            Dataset[] clusters3 = clusterer.cluster(data);
+            Dataset[] clusters3 = clusterer3.cluster(data);
+            Dataset[] clusters4 = clusterer4.cluster(data);
 
             double aicScore3 = factory.createClusterEvaluation("AICScore").score(clusters3);
             double bicScore3 = factory.createClusterEvaluation("BICScore").score(clusters3);
             double sseScore3 = factory.createClusterEvaluation("SumOfSquaredErrors").score(clusters3);
 
+            double aicScore4 = factory.createClusterEvaluation("AICScore").score(clusters4);
+            double bicScore4 = factory.createClusterEvaluation("BICScore").score(clusters4);
+            double sseScore4 = factory.createClusterEvaluation("SumOfSquaredErrors").score(clusters4);
+
 
             System.out.println("AIC score: " + aicScore3);
             System.out.println("BIC score: " + bicScore3);
-            System.out.println("Sum of squared errors: " + sseScore3);
+            System.out.println("SSE score: " + sseScore3);
+
+            System.out.println("AIC score: " + aicScore4);
+            System.out.println("BIC score: " + bicScore4);
+            System.out.println("SSE score: " + sseScore4);
 
         }
     }

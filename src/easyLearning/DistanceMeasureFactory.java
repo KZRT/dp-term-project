@@ -1,5 +1,6 @@
 package easyLearning;
 
+import net.sf.javaml.core.Dataset;
 import net.sf.javaml.distance.*;
 import net.sf.javaml.distance.dtw.DTWSimilarity;
 import net.sf.javaml.distance.fastdtw.Abstraction;
@@ -7,23 +8,30 @@ import net.sf.javaml.distance.fastdtw.Band;
 import net.sf.javaml.distance.fastdtw.FastDTW;
 
 public class DistanceMeasureFactory {
+    private static DistanceMeasureFactory instance = null;
+    private Dataset data = null;
+    private int radius = -1;
+
+    private DistanceMeasureFactory() {
+    }
+
+    public static DistanceMeasureFactory getInstance() {
+        if (instance == null) {
+            instance = new DistanceMeasureFactory();
+        }
+        return instance;
+    }
 
     public DistanceMeasure createDistanceMeasure(String distanceMeasureType) {
         switch (distanceMeasureType) {
             case "AngularDistance":
                 return new AngularDistance();
-            case "CachedDistance":
-                return new CachedDistance();
             case "ChebychevDistance":
-                return new ChebychevDistance();
-            case "ConsistencyIndex":
-                return new ConsistencyIndex();
+            return new ChebychevDistance();
             case "CosineDistance":
                 return new CosineDistance();
             case "CosineSimilarity":
                 return new CosineSimilarity();
-            case "DistanceMeasure":
-                return new DistanceMeasure();
             case "EuclideanDistance":
                 return new EuclideanDistance();
             case "JaccardIndexDistance":
@@ -40,16 +48,10 @@ public class DistanceMeasureFactory {
                 return new MaxProductSimilarity();
             case "MinkowskiDistance":
                 return new MinkowskiDistance();
-            case "NormalizedEuclideanDistance":
-                return new NormalizedEuclideanDistance();
-            case "NormalizedEuclideanSimilarity":
-                return new NormalizedEuclideanSimilarity();
             case "NormDistance":
                 return new NormDistance();
             case "PearsonCorrelationCoefficient":
                 return new PearsonCorrelationCoefficient();
-            case "PolynomialKernel":
-                return new PolynomialKernel();
             case "RBFKernel":
                 return new RBFKernel();
             case "RBFKernelDistance":
@@ -60,14 +62,48 @@ public class DistanceMeasureFactory {
                 return new SpearmanRankCorrelation();
             case "DTWSimilarity":
                 return new DTWSimilarity();
+            case "NormalizedEuclideanDistance":
+                if (this.data == null) {
+                    System.out.println("Set data first!");
+                    throw new NullPointerException();
+                }
+                return new NormalizedEuclideanDistance(this.data);
+            case "CachedDistance":
+                return new CachedDistance(new EuclideanDistance());
+            case "NormalizedEuclideanSimilarity":
+                if (this.data == null) {
+                    System.out.println("Set data first!");
+                    throw new NullPointerException();
+                }
+                return new NormalizedEuclideanSimilarity(this.data);
             case "Abstraction":
-                return new Abstraction();
+                if(this.radius == -1) {
+                    System.out.println("Set radius first!");
+                    throw new NullPointerException();
+                }
+                return new Abstraction(this.radius);
             case "Band":
-                return new Band();
+                if(this.radius == -1) {
+                    System.out.println("Set radius first!");
+                    throw new NullPointerException();
+                }
+                return new Band(this.radius);
             case "FastDTW":
-                return new FastDTW();
+                if(this.radius == -1) {
+                    System.out.println("Set radius first!");
+                    throw new NullPointerException();
+                }
+                return new FastDTW(this.radius);
             default:
                 return new EuclideanDistance();
         }
+    }
+
+    public void setData(Dataset data) {
+        this.data = data;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
     }
 }

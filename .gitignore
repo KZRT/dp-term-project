@@ -25,6 +25,8 @@ bin/
 ### etc ###
 .idea/
 javaml/
+*.iml
+.gitmodules
 
 ### VS Code ###
 .vscode/
