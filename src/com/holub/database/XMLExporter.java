@@ -77,7 +77,6 @@ public class XMLExporter implements Table.Exporter {
     }
 
     public void storeMetadata(String tableName, int width, int height, Iterator columnNames) throws IOException {
-        System.out.println("storeMetadata");
         this.width = width;
         out.write(tableName == null ? "<anonymous>" : "<" + tableName + ">"); // start table
         out.write("\n");
@@ -89,11 +88,9 @@ public class XMLExporter implements Table.Exporter {
             String columnName = nextData.toString();
             this.columnNames.add(columnName);
         }
-        System.out.println(this.columnNames);
     }
 
     public void storeRow(Iterator data) throws IOException {
-        System.out.println("storeRow");
         int i = 0;
         String nextColumnName;
         out.write("\t<" + tableName + height + ">\n");

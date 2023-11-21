@@ -802,6 +802,10 @@ import com.holub.tools.ArrayIterator;
             Writer out2 = new FileWriter("test.people.xml");
             people.export(new XMLExporter(out2));
             out2.close();
+
+            Reader in2 = new FileReader("test.people.xml");
+            people = new ConcreteTable(new XMLImporter(in2));
+            in2.close();
         }
 
         public void testJoin() {
