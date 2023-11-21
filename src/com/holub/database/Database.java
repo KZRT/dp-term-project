@@ -805,8 +805,12 @@ public final class Database {    /* The directory that represents the database.
             if (columns == null) {
                 columns = new ArrayList<>();
                 for (int i = 0; i < requestedTableNames.size(); i++) {
+<<<<<<< HEAD
                     File dir = new File("c:/dp2023");
                     FileReader file = new FileReader(dir, requestedTableNames.get(i) + ".csv");
+=======
+                    FileReader file = new FileReader("c:/dp2023/" + requestedTableNames.get(i) + ".csv");
+>>>>>>> f203fa8cefc3c0fe6b0f8fe55783f11945c5c0ba
                     BufferedReader br = new BufferedReader(file);
                     CSVImporter builder = new CSVImporter(br);
                     builder.startTable();
