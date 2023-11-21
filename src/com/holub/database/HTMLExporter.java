@@ -115,8 +115,7 @@ public class HTMLExporter implements Table.Exporter {
                 " \n" +
                 "<head>\n" +
                 "\t<meta charset=\"UTF-8\">\n" +
-                "\t<title>GFG User Details</title>\n" +
-                "\t<!-- CSS FOR STYLING THE PAGE -->\n" +
+                "\t<title>Database Table HTML Exporter</title>\n" +
                 "\t<style>\n" +
                 "\t\ttable {\n" +
                 "\t\t\tmargin: 0 auto;\n" +
