@@ -5,9 +5,19 @@ import com.holub.database.TableFactory;
 import com.holub.text.ParseFailure;
 import com.holub.text.Scanner;
 import com.holub.text.TokenSet;
+import net.sf.javaml.classification.Classifier;
+import net.sf.javaml.classification.KNearestNeighbors;
+import net.sf.javaml.classification.evaluation.CrossValidation;
+import net.sf.javaml.classification.evaluation.PerformanceMeasure;
+import net.sf.javaml.core.Dataset;
+import net.sf.javaml.tools.data.FileHandler;
+// Import Abeel java toolkit
+
 
 import javax.swing.*;
 import java.io.*;
+import java.util.Map;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
@@ -44,13 +54,13 @@ public class Main {
 
                 System.out.println("Parsing: " + test);
                 Table result = null;
-                try {
-                    result = theDatabase.execute(test);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (ParseFailure e) {
-                    throw new RuntimeException(e);
-                }
+//                try {
+//                    result = theDatabase.execute(test);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                } catch (ParseFailure e) {
+//                    throw new RuntimeException(e);
+//                }
 
                 if (result != null)    // it was a SELECT of some sort
                     System.out.println(result.toString());
@@ -74,7 +84,44 @@ public class Main {
                 throw new RuntimeException(e);
             }
             System.out.println("Database PASSED");
-            System.exit(0);
+
+            TutorialCVSameFolds tutorialCVSameFolds = new TutorialCVSameFolds();
+            try {
+                tutorialCVSameFolds.main(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static class TutorialCVSameFolds {
+        /**
+         * Default cross-validation with the same folds for multiple runs.
+         */
+        public void main(String[] args) throws Exception {
+            /* Load data */
+            Dataset data = FileHandler.loadDataset(new File("devtools/data/iris.data"), 4, ",");
+            /* Construct KNN classifier */
+            Classifier knn = new KNearestNeighbors(5);
+            /* Construct new cross validation instance with the KNN classifier, */
+            CrossValidation cv = new CrossValidation(knn);
+            /*
+             * Perform 5-fold cross-validation on the data set with a user-defined
+             * random generator
+             */
+            Map<Object, PerformanceMeasure> p = cv.crossValidation(data, 5, new Random(1));
+
+            Map<Object, PerformanceMeasure> q = cv.crossValidation(data, 5, new Random(1));
+
+            Map<Object, PerformanceMeasure> r = cv.crossValidation(data, 5, new Random(25));
+
+            System.out.println("Accuracy=" + p.get("Iris-virginica").getAccuracy());
+            System.out.println("Accuracy=" + q.get("Iris-virginica").getAccuracy());
+            System.out.println("Accuracy=" + r.get("Iris-virginica").getAccuracy());
+            System.out.println(p);
+            System.out.println(q);
+            System.out.println(r);
+
         }
     }
 }
