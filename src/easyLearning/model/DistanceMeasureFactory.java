@@ -27,7 +27,7 @@ public class DistanceMeasureFactory {
             case "AngularDistance":
                 return new AngularDistance();
             case "ChebychevDistance":
-            return new ChebychevDistance();
+                return new ChebychevDistance();
             case "CosineDistance":
                 return new CosineDistance();
             case "CosineSimilarity":

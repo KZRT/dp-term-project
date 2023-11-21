@@ -3,7 +3,10 @@ package easyLearning.model;
 import net.sf.javaml.clustering.*;
 import net.sf.javaml.clustering.evaluation.*;
 import net.sf.javaml.clustering.mcl.MCL;
+import net.sf.javaml.distance.AbstractSimilarity;
 import net.sf.javaml.distance.DistanceMeasure;
+
+import java.util.Arrays;
 
 public class ClustererFactory {
     private static ClustererFactory instance = null;
@@ -26,30 +29,25 @@ public class ClustererFactory {
         this.clusters = clusters;
     }
 
-    public Clusterer createClusterer(String clustererType) throws NullPointerException {
+    public Clusterer createClusterer(String clustererType) throws NullPointerException, IllegalArgumentException {
         switch (clustererType) {
             case "KMeans":
                 if(this.clusters == -1) {
-                    System.out.println("Set cluster size first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set cluster size first!");
                 }
                 return new KMeans(this.clusters, 300);
             case "KMedoids":
                 if(this.clusters == -1) {
-                    System.out.println("Set cluster size first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set cluster size first!");
                 } else if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 return new KMedoids(this.clusters, 300, dm);
             case "FarthestFirst":
                 if(this.clusters == -1) {
-                    System.out.println("Set cluster size first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 } else if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 return new FarthestFirst(this.clusters, dm);
             case "Cobweb":
@@ -60,8 +58,11 @@ public class ClustererFactory {
                 return new DensityBasedSpatialClustering();
             case "MCL":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
+                }
+                // if DistanceMeasure is implementation AbstractDistance not AbstractSimilarity, throw exception
+                if (!(this.dm instanceof AbstractSimilarity)) {
+                    throw new IllegalArgumentException("DistanceMeasure must be implementation AbstractSimilarity!");
                 }
                 return new MCL(dm);
         }
@@ -96,50 +97,43 @@ public class ClustererFactory {
                 break;
             case "CIndex":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new CIndex(dm);
                 break;
             case "Gamma":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new Gamma(dm);
                 break;
             case "GPlus":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new GPlus(dm);
                 break;
             case "MinMaxCut":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new MinMaxCut(dm);
                 break;
             case "PointBiserial":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new PointBiserial(dm);
                 break;
             case "WB":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new WB(dm);
                 break;
             case "Tau":
                 if (this.dm == null) {
-                    System.out.println("Set distance measure first!");
-                    throw new NullPointerException();
+                    throw new NullPointerException("Set distance measure first!");
                 }
                 this.ce = new Tau(dm);
                 break;
