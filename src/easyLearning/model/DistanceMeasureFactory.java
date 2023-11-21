@@ -1,4 +1,4 @@
-package easyLearning;
+package easyLearning.model;
 
 import net.sf.javaml.core.Dataset;
 import net.sf.javaml.distance.*;

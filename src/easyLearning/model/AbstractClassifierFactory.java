@@ -1,4 +1,4 @@
-package easyLearning;
+package easyLearning.model;
 
 import net.sf.javaml.classification.Classifier;
 public interface AbstractClassifierFactory {

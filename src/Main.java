@@ -1,12 +1,8 @@
 import com.holub.database.Database;
-import com.holub.database.JTableExporter;
 import com.holub.database.Table;
-import com.holub.database.TableFactory;
 import com.holub.text.ParseFailure;
-import com.holub.text.Scanner;
-import com.holub.text.TokenSet;
-import easyLearning.ClustererFactory;
-import easyLearning.DistanceMeasureFactory;
+import easyLearning.model.ClustererFactory;
+import easyLearning.model.DistanceMeasureFactory;
 import net.sf.javaml.classification.Classifier;
 import net.sf.javaml.classification.KNearestNeighbors;
 import net.sf.javaml.classification.evaluation.CrossValidation;
@@ -17,7 +13,6 @@ import net.sf.javaml.tools.data.FileHandler;
 // Import Abeel java toolkit
 
 
-import javax.swing.*;
 import java.io.*;
 import java.util.Map;
 import java.util.Random;
@@ -141,6 +136,11 @@ public class Main {
              * Cluster the data, we will create 3 and 4 clusters.
              */
             Dataset[] clusters3 = clusterer3.cluster(data);
+            for (int i= 0; i < 100 ; i++) {
+                clusters3 = clusterer3.cluster(data);
+                double sseScore3 = factory.createClusterEvaluation("SumOfSquaredErrors").score(clusters3);
+                System.out.println("SSE score: " + sseScore3);
+            }
             Dataset[] clusters4 = clusterer4.cluster(data);
 
             double aicScore3 = factory.createClusterEvaluation("AICScore").score(clusters3);

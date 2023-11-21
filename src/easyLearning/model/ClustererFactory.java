@@ -1,4 +1,4 @@
-package easyLearning;
+package easyLearning.model;
 
 import net.sf.javaml.clustering.*;
 import net.sf.javaml.clustering.evaluation.*;
@@ -33,7 +33,7 @@ public class ClustererFactory {
                     System.out.println("Set cluster size first!");
                     throw new NullPointerException();
                 }
-                return new KMeans(this.clusters);
+                return new KMeans(this.clusters, 300);
             case "KMedoids":
                 if(this.clusters == -1) {
                     System.out.println("Set cluster size first!");
@@ -42,7 +42,7 @@ public class ClustererFactory {
                     System.out.println("Set distance measure first!");
                     throw new NullPointerException();
                 }
-                return new KMedoids(this.clusters, 10000, dm);
+                return new KMedoids(this.clusters, 300, dm);
             case "FarthestFirst":
                 if(this.clusters == -1) {
                     System.out.println("Set cluster size first!");
