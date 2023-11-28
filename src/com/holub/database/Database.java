@@ -281,7 +281,7 @@ public final class Database {    /* The directory that represents the database.
      * with the transaction-processing system.
      */
 
-    private final Map tables = new TableMap(new HashMap());
+    private final Map tables = new com.holub.database.Database.TableMap(new HashMap());
 
     /**
      * The current transaction-nesting level, incremented for
@@ -416,22 +416,22 @@ public final class Database {    /* The directory that represents the database.
         }
     }
 
-    private static final RelationalOperator EQ = new RelationalOperator();
-    private static final RelationalOperator LT = new RelationalOperator();
-    private static final RelationalOperator GT = new RelationalOperator();
-    private static final RelationalOperator LE = new RelationalOperator();
-    private static final RelationalOperator GE = new RelationalOperator();
-    private static final RelationalOperator NE = new RelationalOperator();
+    private static final com.holub.database.Database.RelationalOperator EQ = new com.holub.database.Database.RelationalOperator();
+    private static final com.holub.database.Database.RelationalOperator LT = new com.holub.database.Database.RelationalOperator();
+    private static final com.holub.database.Database.RelationalOperator GT = new com.holub.database.Database.RelationalOperator();
+    private static final com.holub.database.Database.RelationalOperator LE = new com.holub.database.Database.RelationalOperator();
+    private static final com.holub.database.Database.RelationalOperator GE = new com.holub.database.Database.RelationalOperator();
+    private static final com.holub.database.Database.RelationalOperator NE = new com.holub.database.Database.RelationalOperator();
 
     private static class MathOperator {
         private MathOperator() {
         }
     }
 
-    private static final MathOperator PLUS = new MathOperator();
-    private static final MathOperator MINUS = new MathOperator();
-    private static final MathOperator TIMES = new MathOperator();
-    private static final MathOperator DIVIDE = new MathOperator();
+    private static final com.holub.database.Database.MathOperator PLUS = new com.holub.database.Database.MathOperator();
+    private static final com.holub.database.Database.MathOperator MINUS = new com.holub.database.Database.MathOperator();
+    private static final com.holub.database.Database.MathOperator TIMES = new com.holub.database.Database.MathOperator();
+    private static final com.holub.database.Database.MathOperator DIVIDE = new com.holub.database.Database.MathOperator();
 
     //@declarations-end
     //--------------------------------------------------------------
@@ -572,6 +572,105 @@ public final class Database {    /* The directory that represents the database.
 
         File tableFile = new File(location, name);
         if (tableFile.exists()) tableFile.delete();
+    }
+
+    private boolean isNaN(String value) {
+        //while(row.hasNext()) {
+        //    String value = row.next().toString();
+        if(value == null || value.isEmpty() || value.compareTo("NaN") == 0 || value.compareTo("null") == 0) {
+            return true;
+        }
+        //}
+        return false;
+    }
+
+    public void dropNaN(com.holub.database.Database database, String tableName) throws IOException {
+        FileReader file = new FileReader(new File(location, tableName + ".csv"));
+        BufferedReader br = new BufferedReader(file);
+        CSVImporter builder = new CSVImporter(br);
+        builder.startTable();
+
+        Iterator columnNames = builder.loadColumnNames();
+        ArrayList columns = new ArrayList<>();
+        int i = 0;
+        while(columnNames.hasNext()) {
+            String columnName = columnNames.next().toString();
+            columns.add(columnName);
+            i++;
+        }
+
+        createTable("dropped" + tableName, columns);
+        Table table = (Table)tables.get("dropped" + tableName);
+        table.begin();
+
+        Iterator row;
+        while((row = builder.loadRow()) != null) {
+            String []dataArray = new String[builder.loadWidth()];
+            i = 0;
+            while(row.hasNext()) {
+                String value = row.next().toString();
+                if(isNaN(value)) {
+                    break;
+                } else {
+                    dataArray[i] = value;
+                    i++;
+                }
+            }
+
+            if(i == builder.loadWidth()) {
+                table.insert(dataArray);
+            }
+        }
+        table.commit(true);
+        Writer out = new FileWriter(new File(location, table.name() + ".csv"));
+        table.export(new CSVExporter(out));
+        out.close();
+    }
+
+    public void dropColumn(String tableName, String dropColumnName) throws IOException {
+        FileReader file = new FileReader("c:/dp2023/" + tableName + ".csv");
+        BufferedReader br = new BufferedReader(file);
+        CSVImporter builder = new CSVImporter(br);
+        builder.startTable();
+
+        int i = 0;
+        int columnNum;
+        List columns = new ArrayList<>();
+
+        Iterator columnNames = builder.loadColumnNames();
+        while (columnNames.hasNext()) {
+            String columnName = columnNames.next().toString();
+            if (columnName.compareTo(dropColumnName) == 0) {
+                columnNum = i;
+            } else
+                columns.add(columnName);
+            i++;
+        }
+
+
+        List dataList = new ArrayList<>();
+        Iterator row;
+
+        Table table = new ConcreteTable(tableName, columns.toArray());
+        table.begin();
+
+        while ((row = builder.loadRow()) != null) {
+            int i = 0;
+            while (row.hasNext()) {
+                String value = row.next().toString();
+                if (i == columnNum) continue;
+                else {
+                    dataList.add(value);
+                }
+                i++;
+            }
+            table.insert(dataList.toArray());
+        }
+        table.commit(true);
+
+        Writer out = new FileWriter(new File(location, tableName + ".csv"));
+        table.export(new DataExporter(out));
+        out.close();
     }
 
     /**
@@ -785,7 +884,7 @@ public final class Database {    /* The directory that represents the database.
             in.required(SET);
             final String columnName = in.required(IDENTIFIER);
             in.required(EQUAL);
-            final Expression value = expr();
+            final com.holub.database.Database.Expression value = expr();
             in.required(WHERE);
             affectedRows = doUpdate(tableName, columnName, value, expr());
         } else if (in.matchAdvance(DELETE) != null) {
@@ -805,7 +904,8 @@ public final class Database {    /* The directory that represents the database.
             if (columns == null) {
                 columns = new ArrayList<>();
                 for (int i = 0; i < requestedTableNames.size(); i++) {
-                    FileReader file = new FileReader(requestedTableNames.get(i) + ".csv");
+                    //FileReader file = new FileReader("c:/dp2023/" + requestedTableNames.get(i) + ".csv");
+                    FileReader file = new FileReader(new File(location, requestedTableNames.get(i) + ".csv"));
                     BufferedReader br = new BufferedReader(file);
                     CSVImporter builder = new CSVImporter(br);
                     builder.startTable();
@@ -818,7 +918,7 @@ public final class Database {    /* The directory that represents the database.
                 }
             }
 
-            Expression where = (in.matchAdvance(WHERE) == null) ? null : expr();
+            com.holub.database.Database.Expression where = (in.matchAdvance(WHERE) == null) ? null : expr();
             Table result = doSelect(columns, into, requestedTableNames, where);
             return result;
         } else {
@@ -926,9 +1026,9 @@ public final class Database {    /* The directory that represents the database.
      * </PRE>
      */
 
-    private Expression expr() throws ParseFailure {
-        Expression left = andExpr();
-        while (in.matchAdvance(OR) != null) left = new LogicalExpression(left, OR, andExpr());
+    private com.holub.database.Database.Expression expr() throws ParseFailure {
+        com.holub.database.Database.Expression left = andExpr();
+        while (in.matchAdvance(OR) != null) left = new com.holub.database.Database.LogicalExpression(left, OR, andExpr());
         return left;
     }
 
@@ -936,9 +1036,9 @@ public final class Database {    /* The directory that represents the database.
     // andExpr'			::= AND relationalExpr andExpr'
     // 					|	e
 
-    private Expression andExpr() throws ParseFailure {
-        Expression left = relationalExpr();
-        while (in.matchAdvance(AND) != null) left = new LogicalExpression(left, AND, relationalExpr());
+    private com.holub.database.Database.Expression andExpr() throws ParseFailure {
+        com.holub.database.Database.Expression left = relationalExpr();
+        while (in.matchAdvance(AND) != null) left = new com.holub.database.Database.LogicalExpression(left, AND, relationalExpr());
         return left;
     }
 
@@ -948,22 +1048,22 @@ public final class Database {    /* The directory that represents the database.
     // 						| LIKE  additiveExpr relationalExpr'
     // 						| e
 
-    private Expression relationalExpr() throws ParseFailure {
-        Expression left = additiveExpr();
+    private com.holub.database.Database.Expression relationalExpr() throws ParseFailure {
+        com.holub.database.Database.Expression left = additiveExpr();
         while (true) {
             String lexeme;
             if ((lexeme = in.matchAdvance(RELOP)) != null) {
-                RelationalOperator op;
+                com.holub.database.Database.RelationalOperator op;
                 if (lexeme.length() == 1) op = lexeme.charAt(0) == '<' ? LT : GT;
                 else {
                     if (lexeme.charAt(0) == '<' && lexeme.charAt(1) == '>') op = NE;
                     else op = lexeme.charAt(0) == '<' ? LE : GE;
                 }
-                left = new RelationalExpression(left, op, additiveExpr());
+                left = new com.holub.database.Database.RelationalExpression(left, op, additiveExpr());
             } else if (in.matchAdvance(EQUAL) != null) {
-                left = new RelationalExpression(left, EQ, additiveExpr());
+                left = new com.holub.database.Database.RelationalExpression(left, EQ, additiveExpr());
             } else if (in.matchAdvance(LIKE) != null) {
-                left = new LikeExpression(left, additiveExpr());
+                left = new com.holub.database.Database.LikeExpression(left, additiveExpr());
             } else break;
         }
         return left;
@@ -973,12 +1073,12 @@ public final class Database {    /* The directory that represents the database.
     // additiveExpr'	::= ADDITIVE multiplicativeExpr additiveExpr'
     // 					|	e
 
-    private Expression additiveExpr() throws ParseFailure {
+    private com.holub.database.Database.Expression additiveExpr() throws ParseFailure {
         String lexeme;
-        Expression left = multiplicativeExpr();
+        com.holub.database.Database.Expression left = multiplicativeExpr();
         while ((lexeme = in.matchAdvance(ADDITIVE)) != null) {
-            MathOperator op = lexeme.charAt(0) == '+' ? PLUS : MINUS;
-            left = new ArithmeticExpression(left, multiplicativeExpr(), op);
+            com.holub.database.Database.MathOperator op = lexeme.charAt(0) == '+' ? PLUS : MINUS;
+            left = new com.holub.database.Database.ArithmeticExpression(left, multiplicativeExpr(), op);
         }
         return left;
     }
@@ -988,11 +1088,11 @@ public final class Database {    /* The directory that represents the database.
     // 						|	SLASH term multiplicativeExpr'
     // 						|	e
 
-    private Expression multiplicativeExpr() throws ParseFailure {
-        Expression left = term();
+    private com.holub.database.Database.Expression multiplicativeExpr() throws ParseFailure {
+        com.holub.database.Database.Expression left = term();
         while (true) {
-            if (in.matchAdvance(STAR) != null) left = new ArithmeticExpression(left, term(), TIMES);
-            else if (in.matchAdvance(SLASH) != null) left = new ArithmeticExpression(left, term(), DIVIDE);
+            if (in.matchAdvance(STAR) != null) left = new com.holub.database.Database.ArithmeticExpression(left, term(), TIMES);
+            else if (in.matchAdvance(SLASH) != null) left = new com.holub.database.Database.ArithmeticExpression(left, term(), DIVIDE);
             else break;
         }
         return left;
@@ -1002,11 +1102,11 @@ public final class Database {    /* The directory that represents the database.
     // 					|	LP expr RP
     // 					|	factor
 
-    private Expression term() throws ParseFailure {
+    private com.holub.database.Database.Expression term() throws ParseFailure {
         if (in.matchAdvance(NOT) != null) {
-            return new NotExpression(expr());
+            return new com.holub.database.Database.NotExpression(expr());
         } else if (in.matchAdvance(LP) != null) {
-            Expression toReturn = expr();
+            com.holub.database.Database.Expression toReturn = expr();
             in.required(RP);
             return toReturn;
         } else return factor();
@@ -1017,16 +1117,16 @@ public final class Database {    /* The directory that represents the database.
     // compoundId'		::= DOT IDENTIFIER
     // 					|	e
 
-    private Expression factor() throws ParseFailure {
+    private com.holub.database.Database.Expression factor() throws ParseFailure {
         try {
             String lexeme;
-            Value result;
+            com.holub.database.Database.Value result;
 
-            if ((lexeme = in.matchAdvance(STRING)) != null) result = new StringValue(lexeme);
+            if ((lexeme = in.matchAdvance(STRING)) != null) result = new com.holub.database.Database.StringValue(lexeme);
 
-            else if ((lexeme = in.matchAdvance(NUMBER)) != null) result = new NumericValue(lexeme);
+            else if ((lexeme = in.matchAdvance(NUMBER)) != null) result = new com.holub.database.Database.NumericValue(lexeme);
 
-            else if ((lexeme = in.matchAdvance(NULL)) != null) result = new NullValue();
+            else if ((lexeme = in.matchAdvance(NULL)) != null) result = new com.holub.database.Database.NullValue();
 
             else {
                 String columnName = in.required(IDENTIFIER);
@@ -1037,10 +1137,10 @@ public final class Database {    /* The directory that represents the database.
                     columnName = in.required(IDENTIFIER);
                 }
 
-                result = new IdValue(tableName, columnName);
+                result = new com.holub.database.Database.IdValue(tableName, columnName);
             }
 
-            return new AtomicExpression(result);
+            return new com.holub.database.Database.AtomicExpression(result);
         } catch (java.text.ParseException e) { /* fall through */ }
 
         error("Couldn't parse Number"); // Always throws a ParseFailure
@@ -1061,155 +1161,155 @@ public final class Database {    /* The directory that represents the database.
      * is null unless a join is being processed.
      */
 
-        Value evaluate(Cursor[] tables) throws ParseFailure;
+        com.holub.database.Database.Value evaluate(Cursor[] tables) throws ParseFailure;
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private class ArithmeticExpression implements Expression {
-        private final MathOperator operator;
-        private final Expression left, right;
+    private class ArithmeticExpression implements com.holub.database.Database.Expression {
+        private final com.holub.database.Database.MathOperator operator;
+        private final com.holub.database.Database.Expression left, right;
 
-        public ArithmeticExpression(Expression left, Expression right, MathOperator operator) {
+        public ArithmeticExpression(com.holub.database.Database.Expression left, com.holub.database.Database.Expression right, com.holub.database.Database.MathOperator operator) {
             this.operator = operator;
             this.left = left;
             this.right = right;
         }
 
-        public Value evaluate(Cursor[] tables) throws ParseFailure {
-            Value leftValue = left.evaluate(tables);
-            Value rightValue = right.evaluate(tables);
+        public com.holub.database.Database.Value evaluate(Cursor[] tables) throws ParseFailure {
+            com.holub.database.Database.Value leftValue = left.evaluate(tables);
+            com.holub.database.Database.Value rightValue = right.evaluate(tables);
 
-            verify(leftValue instanceof NumericValue && rightValue instanceof NumericValue, "Operands to < > <= >= = must be Boolean");
+            verify(leftValue instanceof com.holub.database.Database.NumericValue && rightValue instanceof com.holub.database.Database.NumericValue, "Operands to < > <= >= = must be Boolean");
 
-            double l = ((NumericValue) leftValue).value();
-            double r = ((NumericValue) rightValue).value();
+            double l = ((com.holub.database.Database.NumericValue) leftValue).value();
+            double r = ((com.holub.database.Database.NumericValue) rightValue).value();
 
-            return new NumericValue((operator == PLUS) ? (l + r) : (operator == MINUS) ? (l - r) : (operator == TIMES) ? (l * r) :
+            return new com.holub.database.Database.NumericValue((operator == PLUS) ? (l + r) : (operator == MINUS) ? (l - r) : (operator == TIMES) ? (l * r) :
                     /* operator == DIVIDE  */   (l / r));
         }
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private class LogicalExpression implements Expression {
+    private class LogicalExpression implements com.holub.database.Database.Expression {
         private final boolean isAnd;
-        private final Expression left, right;
+        private final com.holub.database.Database.Expression left, right;
 
-        public LogicalExpression(Expression left, Token op, Expression right) {
+        public LogicalExpression(com.holub.database.Database.Expression left, Token op, com.holub.database.Database.Expression right) {
             assert op == AND || op == OR;
             this.isAnd = (op == AND);
             this.left = left;
             this.right = right;
         }
 
-        public Value evaluate(Cursor[] tables) throws ParseFailure {
-            Value leftValue = left.evaluate(tables);
-            Value rightValue = right.evaluate(tables);
-            verify(leftValue instanceof BooleanValue && rightValue instanceof BooleanValue, "operands to AND and OR must be logical/relational");
+        public com.holub.database.Database.Value evaluate(Cursor[] tables) throws ParseFailure {
+            com.holub.database.Database.Value leftValue = left.evaluate(tables);
+            com.holub.database.Database.Value rightValue = right.evaluate(tables);
+            verify(leftValue instanceof com.holub.database.Database.BooleanValue && rightValue instanceof com.holub.database.Database.BooleanValue, "operands to AND and OR must be logical/relational");
 
-            boolean l = ((BooleanValue) leftValue).value();
-            boolean r = ((BooleanValue) rightValue).value();
+            boolean l = ((com.holub.database.Database.BooleanValue) leftValue).value();
+            boolean r = ((com.holub.database.Database.BooleanValue) rightValue).value();
 
-            return new BooleanValue(isAnd ? (l && r) : (l || r));
+            return new com.holub.database.Database.BooleanValue(isAnd ? (l && r) : (l || r));
         }
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private class NotExpression implements Expression {
-        private final Expression operand;
+    private class NotExpression implements com.holub.database.Database.Expression {
+        private final com.holub.database.Database.Expression operand;
 
-        public NotExpression(Expression operand) {
+        public NotExpression(com.holub.database.Database.Expression operand) {
             this.operand = operand;
         }
 
-        public Value evaluate(Cursor[] tables) throws ParseFailure {
-            Value value = operand.evaluate(tables);
-            verify(value instanceof BooleanValue, "operands to NOT must be logical/relational");
-            return new BooleanValue(!((BooleanValue) value).value());
+        public com.holub.database.Database.Value evaluate(Cursor[] tables) throws ParseFailure {
+            com.holub.database.Database.Value value = operand.evaluate(tables);
+            verify(value instanceof com.holub.database.Database.BooleanValue, "operands to NOT must be logical/relational");
+            return new com.holub.database.Database.BooleanValue(!((com.holub.database.Database.BooleanValue) value).value());
         }
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private class RelationalExpression implements Expression {
-        private final RelationalOperator operator;
-        private final Expression left, right;
+    private class RelationalExpression implements com.holub.database.Database.Expression {
+        private final com.holub.database.Database.RelationalOperator operator;
+        private final com.holub.database.Database.Expression left, right;
 
-        public RelationalExpression(Expression left, RelationalOperator operator, Expression right) {
+        public RelationalExpression(com.holub.database.Database.Expression left, com.holub.database.Database.RelationalOperator operator, com.holub.database.Database.Expression right) {
             this.operator = operator;
             this.left = left;
             this.right = right;
         }
 
-        public Value evaluate(Cursor[] tables) throws ParseFailure {
-            Value leftValue = left.evaluate(tables);
-            Value rightValue = right.evaluate(tables);
+        public com.holub.database.Database.Value evaluate(Cursor[] tables) throws ParseFailure {
+            com.holub.database.Database.Value leftValue = left.evaluate(tables);
+            com.holub.database.Database.Value rightValue = right.evaluate(tables);
 
-            if ((leftValue instanceof StringValue) || (rightValue instanceof StringValue)) {
+            if ((leftValue instanceof com.holub.database.Database.StringValue) || (rightValue instanceof com.holub.database.Database.StringValue)) {
                 verify(operator == EQ || operator == NE, "Can't use < <= > or >= with string");
 
                 boolean isEqual = leftValue.toString().equals(rightValue.toString());
 
-                return new BooleanValue(operator == EQ ? isEqual : !isEqual);
+                return new com.holub.database.Database.BooleanValue(operator == EQ ? isEqual : !isEqual);
             }
 
-            if (rightValue instanceof NullValue || leftValue instanceof NullValue) {
+            if (rightValue instanceof com.holub.database.Database.NullValue || leftValue instanceof com.holub.database.Database.NullValue) {
                 verify(operator == EQ || operator == NE, "Can't use < <= > or >= with NULL");
 
                 // Return true if both the left and right sides are instances
                 // of NullValue.
                 boolean isEqual = leftValue.getClass() == rightValue.getClass();
 
-                return new BooleanValue(operator == EQ ? isEqual : !isEqual);
+                return new com.holub.database.Database.BooleanValue(operator == EQ ? isEqual : !isEqual);
             }
 
             // Convert Boolean values to numbers so we can compare them.
             //
-            if (leftValue instanceof BooleanValue)
-                leftValue = new NumericValue(((BooleanValue) leftValue).value() ? 1 : 0);
-            if (rightValue instanceof BooleanValue)
-                rightValue = new NumericValue(((BooleanValue) rightValue).value() ? 1 : 0);
+            if (leftValue instanceof com.holub.database.Database.BooleanValue)
+                leftValue = new com.holub.database.Database.NumericValue(((com.holub.database.Database.BooleanValue) leftValue).value() ? 1 : 0);
+            if (rightValue instanceof com.holub.database.Database.BooleanValue)
+                rightValue = new com.holub.database.Database.NumericValue(((com.holub.database.Database.BooleanValue) rightValue).value() ? 1 : 0);
 
-            verify(leftValue instanceof NumericValue && rightValue instanceof NumericValue, "Operands must be numbers");
+            verify(leftValue instanceof com.holub.database.Database.NumericValue && rightValue instanceof com.holub.database.Database.NumericValue, "Operands must be numbers");
 
-            double l = ((NumericValue) leftValue).value();
-            double r = ((NumericValue) rightValue).value();
+            double l = ((com.holub.database.Database.NumericValue) leftValue).value();
+            double r = ((com.holub.database.Database.NumericValue) rightValue).value();
 
-            return new BooleanValue((operator == EQ) ? (l == r) : (operator == NE) ? (l != r) : (operator == LT) ? (l > r) : (operator == GT) ? (l < r) : (operator == LE) ? (l <= r) :
+            return new com.holub.database.Database.BooleanValue((operator == EQ) ? (l == r) : (operator == NE) ? (l != r) : (operator == LT) ? (l > r) : (operator == GT) ? (l < r) : (operator == LE) ? (l <= r) :
                     /* operator == GE	 */   (l >= r));
         }
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private class LikeExpression implements Expression {
-        private final Expression left, right;
+    private class LikeExpression implements com.holub.database.Database.Expression {
+        private final com.holub.database.Database.Expression left, right;
 
-        public LikeExpression(Expression left, Expression right) {
+        public LikeExpression(com.holub.database.Database.Expression left, com.holub.database.Database.Expression right) {
             this.left = left;
             this.right = right;
         }
 
-        public Value evaluate(Cursor[] tables) throws ParseFailure {
-            Value leftValue = left.evaluate(tables);
-            Value rightValue = right.evaluate(tables);
-            verify(leftValue instanceof StringValue && rightValue instanceof StringValue, "Both operands to LIKE must be strings");
+        public com.holub.database.Database.Value evaluate(Cursor[] tables) throws ParseFailure {
+            com.holub.database.Database.Value leftValue = left.evaluate(tables);
+            com.holub.database.Database.Value rightValue = right.evaluate(tables);
+            verify(leftValue instanceof com.holub.database.Database.StringValue && rightValue instanceof com.holub.database.Database.StringValue, "Both operands to LIKE must be strings");
 
-            String compareTo = ((StringValue) leftValue).value();
-            String regex = ((StringValue) rightValue).value();
+            String compareTo = ((com.holub.database.Database.StringValue) leftValue).value();
+            String regex = ((com.holub.database.Database.StringValue) rightValue).value();
             regex = regex.replaceAll("%", ".*");
 
-            return new BooleanValue(compareTo.matches(regex));
+            return new com.holub.database.Database.BooleanValue(compareTo.matches(regex));
         }
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private class AtomicExpression implements Expression {
-        private final Value atom;
+    private class AtomicExpression implements com.holub.database.Database.Expression {
+        private final com.holub.database.Database.Value atom;
 
-        public AtomicExpression(Value atom) {
+        public AtomicExpression(com.holub.database.Database.Value atom) {
             this.atom = atom;
         }
 
-        public Value evaluate(Cursor[] tables) {
-            return atom instanceof IdValue ? ((IdValue) atom).value(tables)    // lookup cell in table and
+        public com.holub.database.Database.Value evaluate(Cursor[] tables) {
+            return atom instanceof com.holub.database.Database.IdValue ? ((com.holub.database.Database.IdValue) atom).value(tables)    // lookup cell in table and
                     : atom                            // convert to appropriate type
                     ;
         }
@@ -1229,14 +1329,14 @@ public final class Database {    /* The directory that represents the database.
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private static class NullValue implements Value {
+    private static class NullValue implements com.holub.database.Database.Value {
         public String toString() {
             return null;
         }
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private static final class BooleanValue implements Value {
+    private static final class BooleanValue implements com.holub.database.Database.Value {
         boolean value;
 
         public BooleanValue(boolean value) {
@@ -1255,7 +1355,7 @@ public final class Database {    /* The directory that represents the database.
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private static class StringValue implements Value {
+    private static class StringValue implements com.holub.database.Database.Value {
         private String value;
 
         public StringValue(String lexeme) {
@@ -1272,7 +1372,7 @@ public final class Database {    /* The directory that represents the database.
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private final class NumericValue implements Value {
+    private final class NumericValue implements com.holub.database.Database.Value {
         private double value;
 
         public NumericValue(double value)    // initialize from a double.
@@ -1296,7 +1396,7 @@ public final class Database {    /* The directory that represents the database.
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private final class IdValue implements Value {
+    private final class IdValue implements com.holub.database.Database.Value {
         String tableName;
         String columnName;
 
@@ -1345,18 +1445,18 @@ public final class Database {    /* The directory that represents the database.
         /**
          * Using the cursor, extract the referenced cell from the
          * current row of the appropriate table, convert the
-         * contents to a {@link NullValue}, {@link NumericValue},
-         * or {@link StringValue}, as appropriate, and return
+         * contents to a {@link com.holub.database.Database.NullValue}, {@link com.holub.database.Database.NumericValue},
+         * or {@link com.holub.database.Database.StringValue}, as appropriate, and return
          * that value object.
          */
-        public Value value(Cursor[] participants) {
+        public com.holub.database.Database.Value value(Cursor[] participants) {
             String s = toString(participants);
             try {
-                return (s == null) ? (Value) new NullValue() : (Value) new NumericValue(s);
+                return (s == null) ? (com.holub.database.Database.Value) new com.holub.database.Database.NullValue() : (com.holub.database.Database.Value) new com.holub.database.Database.NumericValue(s);
             } catch (java.text.ParseException e) {    // The NumericValue constructor failed, so it must be
                 // a string. Fall through to the return-a-string case.
             }
-            return new StringValue(s);
+            return new com.holub.database.Database.StringValue(s);
         }
     }
 
@@ -1365,7 +1465,7 @@ public final class Database {    /* The directory that represents the database.
     //======================================================================
     // Workhorse methods called from the parser.
     //
-    private Table doSelect(List columns, String into, List requestedTableNames, final Expression where) throws ParseFailure {
+    private Table doSelect(List columns, String into, List requestedTableNames, final com.holub.database.Database.Expression where) throws ParseFailure {
 
         Iterator tableNames = requestedTableNames.iterator();
 
@@ -1393,10 +1493,10 @@ public final class Database {    /* The directory that represents the database.
                 new Selector.Adapter() {
                     public boolean approve(Cursor[] tables) {
                         try {
-                            Value result = where.evaluate(tables);
+                            com.holub.database.Database.Value result = where.evaluate(tables);
 
-                            verify(result instanceof BooleanValue, "WHERE clause must yield boolean result");
-                            return ((BooleanValue) result).value();
+                            verify(result instanceof com.holub.database.Database.BooleanValue, "WHERE clause must yield boolean result");
+                            return ((com.holub.database.Database.BooleanValue) result).value();
                         } catch (ParseFailure e) {
                             throw new ThrowableContainer(e);
                         }
@@ -1427,7 +1527,7 @@ public final class Database {    /* The directory that represents the database.
         Table t = (Table) tables.get(tableName);
 
         for (Iterator i = values.iterator(); i.hasNext(); ) {
-            Expression current = (Expression) i.next();
+            com.holub.database.Database.Expression current = (com.holub.database.Database.Expression) i.next();
             processedValues.add(current.evaluate(null).toString());
         }
 
@@ -1440,17 +1540,17 @@ public final class Database {    /* The directory that represents the database.
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private int doUpdate(String tableName, final String columnName, final Expression value, final Expression where) throws ParseFailure {
+    private int doUpdate(String tableName, final String columnName, final com.holub.database.Database.Expression value, final com.holub.database.Database.Expression where) throws ParseFailure {
         Table t = (Table) tables.get(tableName);
         try {
             return t.update(new Selector() {
                 public boolean approve(Cursor[] tables) {
                     try {
-                        Value result = where.evaluate(tables);
+                        com.holub.database.Database.Value result = where.evaluate(tables);
 
-                        verify(result instanceof BooleanValue, "WHERE clause must yield boolean result");
+                        verify(result instanceof com.holub.database.Database.BooleanValue, "WHERE clause must yield boolean result");
 
-                        return ((BooleanValue) result).value();
+                        return ((com.holub.database.Database.BooleanValue) result).value();
                     } catch (ParseFailure e) {
                         throw new ThrowableContainer(e);
                     }
@@ -1458,7 +1558,7 @@ public final class Database {    /* The directory that represents the database.
 
                 public void modify(Cursor current) {
                     try {
-                        Value newValue = value.evaluate(new Cursor[]{current});
+                        com.holub.database.Database.Value newValue = value.evaluate(new Cursor[]{current});
                         current.update(columnName, newValue.toString());
                     } catch (ParseFailure e) {
                         throw new ThrowableContainer(e);
@@ -1471,15 +1571,15 @@ public final class Database {    /* The directory that represents the database.
     }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    private int doDelete(String tableName, final Expression where) throws ParseFailure {
+    private int doDelete(String tableName, final com.holub.database.Database.Expression where) throws ParseFailure {
         Table t = (Table) tables.get(tableName);
         try {
             return t.delete(new Selector.Adapter() {
                 public boolean approve(Cursor[] tables) {
                     try {
-                        Value result = where.evaluate(tables);
-                        verify(result instanceof BooleanValue, "WHERE clause must yield boolean result");
-                        return ((BooleanValue) result).value();
+                        com.holub.database.Database.Value result = where.evaluate(tables);
+                        verify(result instanceof com.holub.database.Database.BooleanValue, "WHERE clause must yield boolean result");
+                        return ((com.holub.database.Database.BooleanValue) result).value();
                     } catch (ParseFailure e) {
                         throw new ThrowableContainer(e);
                     }
@@ -1494,7 +1594,7 @@ public final class Database {    /* The directory that represents the database.
     //--------------------------------------------------------------
     public static class Test {
         public static void main(String[] args) throws IOException, ParseFailure {
-            Database theDatabase = new Database();
+            com.holub.database.Database theDatabase = new com.holub.database.Database();
 
             // Read a sequence of SQL statements in from the file
             // Database.test.sql and execute them.
