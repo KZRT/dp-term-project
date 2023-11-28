@@ -605,20 +605,20 @@ public final class Database {    /* The directory that represents the database.
 
         Iterator row;
         while ((row = builder.loadRow()) != null) {
-            String[] dataArray = new String[builder.loadWidth()];
+            List dataList = new ArrayList<>();
             i = 0;
             while (row.hasNext()) {
                 String value = row.next().toString();
                 if (isNaN(value)) {
                     break;
                 } else {
-                    dataArray[i] = value;
+                    dataList.add(value);
                     i++;
                 }
             }
 
             if (i == builder.loadWidth()) {
-                table.insert(dataArray);
+                table.insert(dataList.toArray());
             }
         }
         table.commit(true);
@@ -647,13 +647,12 @@ public final class Database {    /* The directory that represents the database.
             i++;
         }
 
-        List dataList = new ArrayList<>();
-        Iterator row;
-
         Table table = new ConcreteTable(tableName, (String [])columns.toArray(new String[0]));
         table.begin();
 
+        Iterator row;
         while ((row = builder.loadRow()) != null) {
+            List dataList = new ArrayList<>();
             i = 0;
             while (row.hasNext()) {
                 String value = row.next().toString();
@@ -663,6 +662,7 @@ public final class Database {    /* The directory that represents the database.
                 }
                 i++;
             }
+
             if(dataList.size() == columns.size()) table.insert(dataList.toArray());
         }
         table.commit(true);
