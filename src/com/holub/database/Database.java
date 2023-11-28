@@ -584,10 +584,11 @@ public final class Database {    /* The directory that represents the database.
         return false;
     }
 
-    public void dropNaN(com.holub.database.Database database, String tableName) throws IOException {
-        FileReader file = new FileReader(new File(location, tableName + ".csv"));
+    public void dropNaN(String tableName) throws IOException {
+        //FileReader file = new FileReader(new File(location, tableName + ".csv"));
+        FileReader file = new FileReader(new File(location, "dropped_" + tableName));
         BufferedReader br = new BufferedReader(file);
-        CSVImporter builder = new CSVImporter(br);
+        KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
         builder.startTable();
 
         Iterator columnNames = builder.loadColumnNames();
@@ -599,8 +600,7 @@ public final class Database {    /* The directory that represents the database.
             i++;
         }
 
-        createTable("dropped" + tableName, columns);
-        Table table = (Table) tables.get("dropped" + tableName);
+        Table table = new ConcreteTable("dropped" + tableName, (String [])columns.toArray(new String[0]));
         table.begin();
 
         Iterator row;
@@ -622,15 +622,16 @@ public final class Database {    /* The directory that represents the database.
             }
         }
         table.commit(true);
-        Writer out = new FileWriter(new File(location, table.name() + ".csv"));
-        table.export(new CSVExporter(out));
+        Writer out = new FileWriter(new File(location, "dropped_" + tableName));
+        table.export(new KaggleCSVExporter(out));
         out.close();
     }
 
     public void dropColumn(String tableName, String dropColumnName) throws IOException {
-        FileReader file = new FileReader("c:/dp2023/" + tableName + ".csv");
+        //FileReader file = new FileReader("c:/dp2023/" + tableName + ".csv");
+        FileReader file = new FileReader(new File(location, tableName));
         BufferedReader br = new BufferedReader(file);
-        CSVImporter builder = new CSVImporter(br);
+        KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
         builder.startTable();
 
         int i = 0;
@@ -646,11 +647,10 @@ public final class Database {    /* The directory that represents the database.
             i++;
         }
 
-
         List dataList = new ArrayList<>();
         Iterator row;
 
-        Table table = new ConcreteTable(tableName, (String[]) columns.toArray());
+        Table table = new ConcreteTable(tableName, (String [])columns.toArray(new String[0]));
         table.begin();
 
         while ((row = builder.loadRow()) != null) {
@@ -663,12 +663,12 @@ public final class Database {    /* The directory that represents the database.
                 }
                 i++;
             }
-            table.insert(dataList.toArray());
+            if(dataList.size() == columns.size()) table.insert(dataList.toArray());
         }
         table.commit(true);
 
-        Writer out = new FileWriter(new File(location, tableName + ".csv"));
-        table.export(new CSVExporter(out));
+        Writer out = new FileWriter(new File(location, "dropped_" + tableName));
+        table.export(new KaggleCSVExporter(out));
         out.close();
     }
 
