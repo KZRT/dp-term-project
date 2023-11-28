@@ -577,7 +577,7 @@ public final class Database {    /* The directory that represents the database.
     private boolean isNaN(String value) {
         //while(row.hasNext()) {
         //    String value = row.next().toString();
-        if(value == null || value.isEmpty() || value.compareTo("NaN") == 0 || value.compareTo("null") == 0) {
+        if (value == null || value.isEmpty() || value.compareTo("NaN") == 0 || value.compareTo("null") == 0) {
             return true;
         }
         //}
@@ -593,23 +593,23 @@ public final class Database {    /* The directory that represents the database.
         Iterator columnNames = builder.loadColumnNames();
         ArrayList columns = new ArrayList<>();
         int i = 0;
-        while(columnNames.hasNext()) {
+        while (columnNames.hasNext()) {
             String columnName = columnNames.next().toString();
             columns.add(columnName);
             i++;
         }
 
         createTable("dropped" + tableName, columns);
-        Table table = (Table)tables.get("dropped" + tableName);
+        Table table = (Table) tables.get("dropped" + tableName);
         table.begin();
 
         Iterator row;
-        while((row = builder.loadRow()) != null) {
-            String []dataArray = new String[builder.loadWidth()];
+        while ((row = builder.loadRow()) != null) {
+            String[] dataArray = new String[builder.loadWidth()];
             i = 0;
-            while(row.hasNext()) {
+            while (row.hasNext()) {
                 String value = row.next().toString();
-                if(isNaN(value)) {
+                if (isNaN(value)) {
                     break;
                 } else {
                     dataArray[i] = value;
@@ -617,7 +617,7 @@ public final class Database {    /* The directory that represents the database.
                 }
             }
 
-            if(i == builder.loadWidth()) {
+            if (i == builder.loadWidth()) {
                 table.insert(dataArray);
             }
         }
@@ -634,7 +634,7 @@ public final class Database {    /* The directory that represents the database.
         builder.startTable();
 
         int i = 0;
-        int columnNum;
+        int columnNum = 0;
         List columns = new ArrayList<>();
 
         Iterator columnNames = builder.loadColumnNames();
@@ -642,8 +642,7 @@ public final class Database {    /* The directory that represents the database.
             String columnName = columnNames.next().toString();
             if (columnName.compareTo(dropColumnName) == 0) {
                 columnNum = i;
-            } else
-                columns.add(columnName);
+            } else columns.add(columnName);
             i++;
         }
 
@@ -651,11 +650,11 @@ public final class Database {    /* The directory that represents the database.
         List dataList = new ArrayList<>();
         Iterator row;
 
-        Table table = new ConcreteTable(tableName, columns.toArray());
+        Table table = new ConcreteTable(tableName, (String[]) columns.toArray());
         table.begin();
 
         while ((row = builder.loadRow()) != null) {
-            int i = 0;
+            i = 0;
             while (row.hasNext()) {
                 String value = row.next().toString();
                 if (i == columnNum) continue;
@@ -669,7 +668,7 @@ public final class Database {    /* The directory that represents the database.
         table.commit(true);
 
         Writer out = new FileWriter(new File(location, tableName + ".csv"));
-        table.export(new DataExporter(out));
+        table.export(new CSVExporter(out));
         out.close();
     }
 
@@ -911,7 +910,7 @@ public final class Database {    /* The directory that represents the database.
                     builder.startTable();
 
                     Iterator columnNames = builder.loadColumnNames();
-                    while(columnNames.hasNext()) {
+                    while (columnNames.hasNext()) {
                         String columnName = columnNames.next().toString();
                         columns.add(columnName);
                     }
@@ -1028,7 +1027,8 @@ public final class Database {    /* The directory that represents the database.
 
     private com.holub.database.Database.Expression expr() throws ParseFailure {
         com.holub.database.Database.Expression left = andExpr();
-        while (in.matchAdvance(OR) != null) left = new com.holub.database.Database.LogicalExpression(left, OR, andExpr());
+        while (in.matchAdvance(OR) != null)
+            left = new com.holub.database.Database.LogicalExpression(left, OR, andExpr());
         return left;
     }
 
@@ -1038,7 +1038,8 @@ public final class Database {    /* The directory that represents the database.
 
     private com.holub.database.Database.Expression andExpr() throws ParseFailure {
         com.holub.database.Database.Expression left = relationalExpr();
-        while (in.matchAdvance(AND) != null) left = new com.holub.database.Database.LogicalExpression(left, AND, relationalExpr());
+        while (in.matchAdvance(AND) != null)
+            left = new com.holub.database.Database.LogicalExpression(left, AND, relationalExpr());
         return left;
     }
 
@@ -1091,8 +1092,10 @@ public final class Database {    /* The directory that represents the database.
     private com.holub.database.Database.Expression multiplicativeExpr() throws ParseFailure {
         com.holub.database.Database.Expression left = term();
         while (true) {
-            if (in.matchAdvance(STAR) != null) left = new com.holub.database.Database.ArithmeticExpression(left, term(), TIMES);
-            else if (in.matchAdvance(SLASH) != null) left = new com.holub.database.Database.ArithmeticExpression(left, term(), DIVIDE);
+            if (in.matchAdvance(STAR) != null)
+                left = new com.holub.database.Database.ArithmeticExpression(left, term(), TIMES);
+            else if (in.matchAdvance(SLASH) != null)
+                left = new com.holub.database.Database.ArithmeticExpression(left, term(), DIVIDE);
             else break;
         }
         return left;
@@ -1122,9 +1125,11 @@ public final class Database {    /* The directory that represents the database.
             String lexeme;
             com.holub.database.Database.Value result;
 
-            if ((lexeme = in.matchAdvance(STRING)) != null) result = new com.holub.database.Database.StringValue(lexeme);
+            if ((lexeme = in.matchAdvance(STRING)) != null)
+                result = new com.holub.database.Database.StringValue(lexeme);
 
-            else if ((lexeme = in.matchAdvance(NUMBER)) != null) result = new com.holub.database.Database.NumericValue(lexeme);
+            else if ((lexeme = in.matchAdvance(NUMBER)) != null)
+                result = new com.holub.database.Database.NumericValue(lexeme);
 
             else if ((lexeme = in.matchAdvance(NULL)) != null) result = new com.holub.database.Database.NullValue();
 
