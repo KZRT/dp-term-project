@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -25,8 +27,6 @@ public class userSelectFrame extends JFrame{
     private JButton dropNANButton;
     private JButton submitButton;
     private JScrollPane scrollPane1;
-    private JPanel MethodPanel;
-    private JPanel EvaluationPanel;
     private JComboBox DMComboBox;
 
     private File file;
@@ -38,17 +38,16 @@ public class userSelectFrame extends JFrame{
                     setContentPane(MainPanel);
 
                     setTitle("미리보는 AI체험기");
-                    setSize(1500, 1000);
+                    setSize(3000, 1000);
                     setLocationRelativeTo(null);
                     //setResizable(false);
                     setBackground(new Color(83, 88, 76));
 
-                    pack();
                     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     setVisible(true);
                     this.database = new Database();
-                    //this.DMPanel = new DMPanel();
-                    populateDropdown("src/easyLearning/model/parsing/DistanceMeasurement.txt"); // 텍스트 파일 경로를 설정하세요
+                    populateDropdown();
+                    pack();
                 });
 
         importButton.addActionListener(new ActionListener() {
@@ -102,8 +101,9 @@ public class userSelectFrame extends JFrame{
         pack();
     }
 
-    private void populateDropdown(String filePath) {
+    private void populateDropdown() {
         // 텍스트 파일을 읽어와서 드롭다운 버튼에 추가
+        String filePath = "src/easyLearning/model/parsing/DistanceMeasurement.txt";
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
