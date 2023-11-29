@@ -39,7 +39,7 @@ public class userSelectFrame extends JFrame{
         SwingUtilities.invokeLater(() -> {
                     setContentPane(MainPanel);
 
-                    setTitle("미리보는 AI체험기");
+                    setTitle("머신러닝 전, 미리 빠르게 확인해보자!");
                     setSize(3000, 1000);
                     setLocationRelativeTo(null);
                     //setResizable(false);
