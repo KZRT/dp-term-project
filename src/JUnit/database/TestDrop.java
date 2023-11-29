@@ -3,6 +3,7 @@ package JUnit.database;
 import com.holub.database.Database;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
 public class TestDrop {
@@ -24,6 +25,30 @@ public class TestDrop {
 
         try {
             theDatabase.dropNaN("water_potability.csv");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testDropColumn2() {
+        Database theDatabase = new Database();
+
+        try {
+            theDatabase.dropColumn("train.csv", "Name");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testDropNAN2() {
+        Database theDatabase = new Database();
+
+        try {
+            theDatabase.dropNaN("train.csv");
 
         } catch (IOException e) {
             throw new RuntimeException(e);

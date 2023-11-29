@@ -1,16 +1,16 @@
 package easyLearning.model.GUI;
 
 import com.holub.database.Database;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
@@ -60,6 +60,7 @@ public class userSelectFrame extends JFrame{
                     File file = fs.getSelectedFile();
                     setFile(file);
                     try {
+                        loadFile(file.getAbsolutePath());
                         pleaseInsertFileFormatTextArea.setText(file.getAbsolutePath());
                         loadCSVIntoTable(file);
 
@@ -156,6 +157,48 @@ public class userSelectFrame extends JFrame{
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void loadFile(String sourceFilePath) throws IOException {
+
+        // 현재 작업 중인 프로젝트 폴더의 경로
+        String projectFolderPath = System.getProperty("user.dir");
+
+        // 복사 대상 파일의 이름
+        String fileName = new File(sourceFilePath).getName();
+
+        // 복사 대상 파일의 새로운 경로
+        String destinationFilePath = projectFolderPath + File.separator + fileName;
+
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+
+        try {
+            fis = new FileInputStream(sourceFilePath);
+            fos = new FileOutputStream(destinationFilePath);
+
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = fis.read(buffer)) > 0) {
+                fos.write(buffer, 0, length);
+            }
+
+            System.out.println("파일이 성공적으로 복사되었습니다.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                System.err.println("파일 복사 중 오류가 발생했습니다: " + e.getMessage());
+            }
         }
     }
 }
