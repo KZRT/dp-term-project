@@ -622,7 +622,7 @@ public final class Database {    /* The directory that represents the database.
             }
         }
         table.commit(true);
-        Writer out = new FileWriter(new File(location, "dropped_" + tableName));
+        Writer out = new FileWriter(new File(location, "NANDropped_" + tableName));
         table.export(new KaggleCSVExporter(out));
         out.close();
     }
@@ -667,10 +667,101 @@ public final class Database {    /* The directory that represents the database.
         }
         table.commit(true);
 
+        Writer out = new FileWriter(new File(location, "ColumnDropped_" + tableName));
+        table.export(new KaggleCSVExporter(out));
+        out.close();
+    }
+
+    public void dropNaN(File filepath) throws IOException {
+        //FileReader file = new FileReader(new File(location, tableName + ".csv"));
+        String tableName = filepath.getName();
+        FileReader file = new FileReader(new File(filepath.getAbsolutePath(), "dropped_" + tableName));
+        BufferedReader br = new BufferedReader(file);
+        KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
+        builder.startTable();
+
+        Iterator columnNames = builder.loadColumnNames();
+        ArrayList columns = new ArrayList<>();
+        int i = 0;
+        while (columnNames.hasNext()) {
+            String columnName = columnNames.next().toString();
+            columns.add(columnName);
+            i++;
+        }
+
+        Table table = new ConcreteTable("dropped" + tableName, (String [])columns.toArray(new String[0]));
+        table.begin();
+
+        Iterator row;
+        while ((row = builder.loadRow()) != null) {
+            String[] dataArray = new String[builder.loadWidth()];
+            i = 0;
+            while (row.hasNext()) {
+                String value = row.next().toString();
+                if (isNaN(value)) {
+                    break;
+                } else {
+                    dataArray[i] = value;
+                    i++;
+                }
+            }
+
+            if (i == builder.loadWidth()) {
+                table.insert(dataArray);
+            }
+        }
+        table.commit(true);
         Writer out = new FileWriter(new File(location, "dropped_" + tableName));
         table.export(new KaggleCSVExporter(out));
         out.close();
     }
+
+    public void dropColumn(File filepath, String dropColumnName) throws IOException {
+        //FileReader file = new FileReader("c:/dp2023/" + tableName + ".csv");
+        String tableName = filepath.getName();
+        FileReader file = new FileReader(new File(filepath.getAbsolutePath(), tableName));
+        BufferedReader br = new BufferedReader(file);
+        KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
+        builder.startTable();
+
+        int i = 0;
+        int columnNum = 0;
+        List columns = new ArrayList<>();
+
+        Iterator columnNames = builder.loadColumnNames();
+        while (columnNames.hasNext()) {
+            String columnName = columnNames.next().toString();
+            if (columnName.compareTo(dropColumnName) == 0) {
+                columnNum = i;
+            } else columns.add(columnName);
+            i++;
+        }
+
+        List dataList = new ArrayList<>();
+        Iterator row;
+
+        Table table = new ConcreteTable(tableName, (String [])columns.toArray(new String[0]));
+        table.begin();
+
+        while ((row = builder.loadRow()) != null) {
+            i = 0;
+            while (row.hasNext()) {
+                String value = row.next().toString();
+                if (i == columnNum) continue;
+                else {
+                    dataList.add(value);
+                }
+                i++;
+            }
+            if(dataList.size() == columns.size()) table.insert(dataList.toArray());
+        }
+        table.commit(true);
+
+        Writer out = new FileWriter(new File(location, "dropped_" + tableName));
+        table.export(new KaggleCSVExporter(out));
+        out.close();
+    }
+
 
     /**
      * Flush to the persistent store (e.g. disk) all tables that

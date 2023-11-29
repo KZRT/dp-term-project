@@ -1,5 +1,7 @@
+import re
 
 
+# name_lists
 def make_name_list():
     file_path = "name_lists.txt"
     formatted_codes = ""
@@ -34,6 +36,43 @@ def remove_file_extension(file_name, extension=".java"):
         # 다른 경우 그대로 반환
         return file_name
 
-if __name__ == '__parsing__':
-    code = make_name_list()
-    print(code)
+
+# createCLusterer
+# createClustererEvaluation
+# createDistanceMEasure
+def read_file(name):
+    file_path = name
+    formatted_codes = ""
+
+    # 파일 열기
+    with open(file_path, "r") as file:
+        # 파일의 각 줄에 대해 반복
+        for line in file:
+            # 각 줄의 텍스트 파싱 또는 처리
+            # 예를 들어, 각 줄의 단어들을 리스트로 저장하는 경우:
+            words = export_format(line.strip())
+            if words is not None and words != "Set distance measure first!" and words != "Set radius first!" and words != "Set data first!":
+                formatted_codes += words + "\n"
+
+        return formatted_codes
+
+
+def export_format(input_string):
+    # 정규표현식 패턴
+    pattern = r'"(.*?)"'
+
+    # 정규표현식을 사용하여 매칭된 부분을 추출
+    match = re.search(pattern, input_string)
+
+    # 매칭된 부분이 있다면 출력, 없다면 에러 메시지 출력
+    if match:
+        extracted_text = match.group(1)
+        return extracted_text
+    else:
+        return
+
+
+if __name__ == '__main__':
+    # code = make_name_list()
+    # print(code)
+    print(read_file("createDistanceMeasure.txt"))
