@@ -7,14 +7,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -25,8 +21,8 @@ public class userSelectFrame extends JFrame{
     private JButton importButton;
     private JTextArea pleaseInsertFileFormatTextArea;
     private JTable table1;
-    private JButton dropColumnButton;
     private JButton dropNANButton;
+    private JButton dropColumnButton;
     private JButton submitButton;
     private JScrollPane scrollPane1;
     private JComboBox DMComboBox;
@@ -61,6 +57,7 @@ public class userSelectFrame extends JFrame{
                 int result = fs.showOpenDialog(null);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File file = fs.getSelectedFile();
+                    setFile(file);
                     try {
                         pleaseInsertFileFormatTextArea.setText(file.getAbsolutePath());
                         loadCSVIntoTable(file);
@@ -73,6 +70,20 @@ public class userSelectFrame extends JFrame{
             }
         });
         dropColumnButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int selectedColumnNum = table1.getSelectedColumn();
+                    String selectedColumnName = table1.getColumnName(selectedColumnNum);
+                    database.dropColumn(file, selectedColumnName);
+                    updateTable();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                }
+            }
+        });
+        dropNANButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -109,11 +120,18 @@ public class userSelectFrame extends JFrame{
         // 편집 비활성화
         this.table1.setDefaultEditor(Object.class, null);
 
-        // 셀 선택 비활성화
-        this.table1.setCellSelectionEnabled(false);
+        // Enable cell selection (default is row selection)
+        this.table1.setCellSelectionEnabled(true);
+
+        // Disable row selection
+        this.table1.setRowSelectionAllowed(false);
 
         // 열 이동 비활성화
         this.table1.getTableHeader().setReorderingAllowed(false);
+    }
+
+    private void setFile(File file){
+        this.file = file;
     }
 
 
