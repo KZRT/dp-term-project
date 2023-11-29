@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -77,6 +78,10 @@ public class userSelectFrame extends JFrame{
                     int selectedColumnNum = table1.getSelectedColumn();
                     String selectedColumnName = table1.getColumnName(selectedColumnNum);
                     database.dropColumn(file, selectedColumnName);
+                    String tableName = file.getName();
+                    String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
+
+                    loadCSVIntoTable(new File( "ColumnDropped_" + tableName));
                     updateTable();
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(null, exception.getMessage());

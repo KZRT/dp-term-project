@@ -673,7 +673,7 @@ public final class Database {    /* The directory that represents the database.
         }
         table.commit(true);
 
-        Writer out = new FileWriter(new File(location, "NANDropped_" + tableName));
+        Writer out = new FileWriter(new File(location, "ColumnDropped_" + tableName));
         table.export(new KaggleCSVExporter(out));
         out.close();
     }
@@ -725,8 +725,7 @@ public final class Database {    /* The directory that represents the database.
     public void dropNaN(File filepath) throws IOException {
         //FileReader file = new FileReader(new File(location, tableName + ".csv"));
         String tableName = filepath.getName();
-        String filePath = Paths.get(filepath.getAbsolutePath()).getParent().toString();
-        FileReader file = new FileReader(new File(filePath, "ColumnDropped_" + tableName));
+        FileReader file = new FileReader("ColumnDropped_" + tableName);
         BufferedReader br = new BufferedReader(file);
         KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
         builder.startTable();
