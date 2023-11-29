@@ -1,12 +1,8 @@
 package JUnit.database;
 
 import com.holub.database.Database;
-import com.holub.database.Table;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 public class TestDrop {

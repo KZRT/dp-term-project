@@ -57,6 +57,7 @@ public class userSelectFrame extends JFrame{
                 int result = fs.showOpenDialog(null);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File file = fs.getSelectedFile();
+                    setFile(file);
                     try {
                         pleaseInsertFileFormatTextArea.setText(file.getAbsolutePath());
                         loadCSVIntoTable(file);
@@ -66,6 +67,20 @@ public class userSelectFrame extends JFrame{
                     }
                 }
 
+            }
+        });
+        dropColumnButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int selectedColumnNum = table1.getSelectedColumn();
+                    String selectedColumnName = table1.getColumnName(selectedColumnNum);
+                    database.dropColumn(file, selectedColumnName);
+                    updateTable();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                }
             }
         });
         dropNANButton.addActionListener(new ActionListener() {
@@ -105,11 +120,18 @@ public class userSelectFrame extends JFrame{
         // 편집 비활성화
         this.table1.setDefaultEditor(Object.class, null);
 
-        // 셀 선택 비활성화
-        this.table1.setCellSelectionEnabled(false);
+        // Enable cell selection (default is row selection)
+        this.table1.setCellSelectionEnabled(true);
+
+        // Disable row selection
+        this.table1.setRowSelectionAllowed(false);
 
         // 열 이동 비활성화
         this.table1.getTableHeader().setReorderingAllowed(false);
+    }
+
+    private void setFile(File file){
+        this.file = file;
     }
 
 
