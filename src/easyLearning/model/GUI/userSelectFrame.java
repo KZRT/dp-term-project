@@ -7,14 +7,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -25,8 +21,8 @@ public class userSelectFrame extends JFrame{
     private JButton importButton;
     private JTextArea pleaseInsertFileFormatTextArea;
     private JTable table1;
-    private JButton dropColumnButton;
     private JButton dropNANButton;
+    private JButton dropColumnButton;
     private JButton submitButton;
     private JScrollPane scrollPane1;
     private JComboBox DMComboBox;
@@ -72,7 +68,7 @@ public class userSelectFrame extends JFrame{
 
             }
         });
-        dropColumnButton.addActionListener(new ActionListener() {
+        dropNANButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {

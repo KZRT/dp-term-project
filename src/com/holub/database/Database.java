@@ -586,7 +586,7 @@ public final class Database {    /* The directory that represents the database.
 
     public void dropNaN(String tableName) throws IOException {
         //FileReader file = new FileReader(new File(location, tableName + ".csv"));
-        FileReader file = new FileReader(new File(location, "dropped_" + tableName));
+        FileReader file = new FileReader(new File(location, "ColumnDropped_" + tableName));
         BufferedReader br = new BufferedReader(file);
         KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
         builder.startTable();
@@ -600,7 +600,7 @@ public final class Database {    /* The directory that represents the database.
             i++;
         }
 
-        Table table = new ConcreteTable("dropped" + tableName, (String [])columns.toArray(new String[0]));
+        Table table = new ConcreteTable("ColumnDropped_" + tableName, (String [])columns.toArray(new String[0]));
         table.begin();
 
         Iterator row;
@@ -675,7 +675,7 @@ public final class Database {    /* The directory that represents the database.
     public void dropNaN(File filepath) throws IOException {
         //FileReader file = new FileReader(new File(location, tableName + ".csv"));
         String tableName = filepath.getName();
-        FileReader file = new FileReader(new File(filepath.getAbsolutePath(), "dropped_" + tableName));
+        FileReader file = new FileReader(new File(filepath.getAbsolutePath(), "ColumnDropped_" + tableName));
         BufferedReader br = new BufferedReader(file);
         KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
         builder.startTable();
@@ -689,7 +689,7 @@ public final class Database {    /* The directory that represents the database.
             i++;
         }
 
-        Table table = new ConcreteTable("dropped" + tableName, (String [])columns.toArray(new String[0]));
+        Table table = new ConcreteTable("ColumnDropped_" + tableName, (String [])columns.toArray(new String[0]));
         table.begin();
 
         Iterator row;

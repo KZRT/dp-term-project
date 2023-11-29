@@ -96,21 +96,21 @@
           <text value="Before Machine Learning, Let's check it out in advance !"/>
         </properties>
       </component>
-      <component id="6e38c" class="javax.swing.JButton" binding="dropNANButton">
+      <component id="6e38c" class="javax.swing.JButton" binding="dropColumnButton">
         <constraints>
           <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Drop NAN"/>
+          <text value="Drop Column"/>
         </properties>
       </component>
-      <component id="2c5b0" class="javax.swing.JButton" binding="dropColumnButton">
+      <component id="2c5b0" class="javax.swing.JButton" binding="dropNANButton">
         <constraints>
           <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="true"/>
-          <text value="Drop Column"/>
+          <text value="Drop NAN"/>
         </properties>
       </component>
       <component id="1a155" class="javax.swing.JLabel">
