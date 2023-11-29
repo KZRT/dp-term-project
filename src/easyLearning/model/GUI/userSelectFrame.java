@@ -1,5 +1,7 @@
 package easyLearning.model.GUI;
 
+import com.holub.database.Database;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -16,21 +18,34 @@ public class userSelectFrame extends JFrame{
     private JButton importButton;
     private JTextArea pleaseInsertFileFormatTextArea;
     private JTable table1;
-    private JButton dropNANButton;
     private JButton dropColumnButton;
+    private JButton dropNANButton;
     private JButton submitButton;
+    private JScrollPane scrollPane1;
     private JComboBox comboBox1;
     private JCheckBox checkBox1;
-    private JScrollPane scrollPane1;
+    private JCheckBox checkBox2;
+    private JCheckBox checkBox4;
+    private JCheckBox checkBox6;
+    private JCheckBox checkBox7;
+    private JCheckBox checkBox8;
+    private JCheckBox checkBox9;
+    private JCheckBox checkBox10;
+    private JCheckBox checkBox11;
+    private JCheckBox checkBox12;
+    private JCheckBox checkBox5;
+    private JCheckBox checkBox3;
 
     private File file;
+
+    private Database database;
 
     public userSelectFrame() {
         SwingUtilities.invokeLater(() -> {
                     setContentPane(MainPanel);
 
                     setTitle("미리보는 AI체험기");
-                    setSize(900, 1000);
+                    setSize(1500, 1000);
                     setLocationRelativeTo(null);
                     //setResizable(false);
                     setBackground(new Color(83, 88, 76));
@@ -38,6 +53,7 @@ public class userSelectFrame extends JFrame{
                     pack();
                     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     setVisible(true);
+                    this.database = new Database();
                 });
 
         importButton.addActionListener(new ActionListener() {
@@ -60,6 +76,18 @@ public class userSelectFrame extends JFrame{
 
             }
         });
+        dropColumnButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    database.dropNaN(file);
+                    updateTable();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                }
+            }
+        });
     }
 
     private void loadCSVIntoTable(File csvFile) {
@@ -67,9 +95,15 @@ public class userSelectFrame extends JFrame{
             // Read CSV file and create a DefaultTableModel
             DefaultTableModel model = createTableFromCSV(csvFile.getAbsolutePath());
             this.table1.setModel(model);
-            this.table1.repaint();
+            scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+            updateTable();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error loading CSV into table: " + e.getMessage());
         }
+    }
+
+    private void updateTable() {
+        this.table1.repaint();
+        pack();
     }
 }
