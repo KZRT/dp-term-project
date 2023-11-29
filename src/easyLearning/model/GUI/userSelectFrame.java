@@ -7,7 +7,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -22,19 +25,9 @@ public class userSelectFrame extends JFrame{
     private JButton dropNANButton;
     private JButton submitButton;
     private JScrollPane scrollPane1;
-    private JComboBox comboBox1;
-    private JCheckBox checkBox1;
-    private JCheckBox checkBox2;
-    private JCheckBox checkBox4;
-    private JCheckBox checkBox6;
-    private JCheckBox checkBox7;
-    private JCheckBox checkBox8;
-    private JCheckBox checkBox9;
-    private JCheckBox checkBox10;
-    private JCheckBox checkBox11;
-    private JCheckBox checkBox12;
-    private JCheckBox checkBox5;
-    private JCheckBox checkBox3;
+    private JPanel MethodPanel;
+    private JPanel EvaluationPanel;
+    private JComboBox DMComboBox;
 
     private File file;
 
@@ -54,6 +47,8 @@ public class userSelectFrame extends JFrame{
                     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     setVisible(true);
                     this.database = new Database();
+                    //this.DMPanel = new DMPanel();
+                    populateDropdown("src/easyLearning/model/parsing/DistanceMeasurement.txt"); // 텍스트 파일 경로를 설정하세요
                 });
 
         importButton.addActionListener(new ActionListener() {
@@ -105,5 +100,17 @@ public class userSelectFrame extends JFrame{
     private void updateTable() {
         this.table1.repaint();
         pack();
+    }
+
+    private void populateDropdown(String filePath) {
+        // 텍스트 파일을 읽어와서 드롭다운 버튼에 추가
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                DMComboBox.addItem(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
