@@ -691,7 +691,7 @@ public final class Database {    /* The directory that represents the database.
     }
 
 
-    public void dropNaN(File filepath) throws IOException {
+    public File dropNaN(File filepath) throws IOException {
         String tableName = filepath.getName();
         String filePath = Paths.get(filepath.getAbsolutePath()).getParent().toString();
         System.out.println(filePath);
@@ -734,6 +734,7 @@ public final class Database {    /* The directory that represents the database.
         Writer out = new FileWriter(new File(location, "NaNDropped_" + tableName));
         table.export(new KaggleCSVExporter(out));
         out.close();
+        return filepath;
     }
 
 

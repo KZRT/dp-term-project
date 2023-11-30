@@ -40,4 +40,10 @@ public class UserSelectController implements Controller {
         System.out.println(droppedFile);
         return importCSVToTable(droppedFile);
     }
+
+    public JTable dropNan() throws IOException {
+        File droppedFile = database.dropNaN(file);
+        System.out.println(droppedFile);
+        return importCSVToTable(droppedFile);
+    }
 }
