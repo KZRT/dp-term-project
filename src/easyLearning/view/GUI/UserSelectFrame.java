@@ -1,6 +1,8 @@
 package easyLearning.view.GUI;
 
 import com.holub.database.Database;
+import easyLearning.controller.DropColumnListener;
+import easyLearning.controller.ImportListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -46,40 +48,8 @@ public class UserSelectFrame extends JFrame{
                     pack();
                 });
 
-        importButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fs = new JFileChooser(new File("c:\\"));
-                fs.setDialogTitle("Open a File");
-                fs.setFileFilter(new FileTypeFilter(".csv", "CSV File"));
-                int result = fs.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File file = fs.getSelectedFile();
-                    setFile(file);
-                    try {
-                        loadFile(file.getAbsolutePath());
-                        pleaseInsertFileFormatTextArea.setText(file.getAbsolutePath());
-                        loadCSVIntoTable(file);
-
-                    } catch (Exception exception) {
-                        JOptionPane.showMessageDialog(null, exception.getMessage());
-                    }
-                }
-
-            }
-        });
-        dropColumnButton.addActionListener(e -> {
-            try {
-                int selectedColumnNum = table1.getSelectedColumn();
-                String selectedColumnName = table1.getColumnName(selectedColumnNum);
-                database.dropColumn(file, selectedColumnName);
-
-                loadCSVIntoTable(new File( "ColumnDropped_" + file.getName()));
-                updateTable();
-            } catch (Exception exception) {
-                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-            }
-        });
+        importButton.addActionListener(new ImportListener(this));
+        dropColumnButton.addActionListener(new DropColumnListener(this, table1));
         dropNANButton.addActionListener(e -> {
             try {
                 database.dropNaN(file);
@@ -102,10 +72,22 @@ public class UserSelectFrame extends JFrame{
         });
     }
 
+    public void setPleaseInsertFileFormatTextArea(String text){
+        this.pleaseInsertFileFormatTextArea.setText(text);
+    }
+
+
+    public void setTable(JTable table){
+        this.table1.setModel(table.getModel());
+        makeTableUneditable();
+        scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        updateTable();
+    }
+
     private void loadCSVIntoTable(File csvFile) {
         try {
             // Read CSV file and create a DefaultTableModel
-            DefaultTableModel model = createTableFromCSV(csvFile.getAbsolutePath());
+            DefaultTableModel model = createTableFromCSV(String.valueOf(csvFile));
             this.table1.setModel(model);
             makeTableUneditable();
             scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -135,7 +117,7 @@ public class UserSelectFrame extends JFrame{
 
 
 
-    private void updateTable() {
+    public void updateTable() {
         this.table1.repaint();
         pack();
     }
