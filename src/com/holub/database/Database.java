@@ -615,10 +615,12 @@ public final class Database {    /* The directory that represents the database.
 
         while ((row = builder.loadRow()) != null) {
             List dataList = new ArrayList<>();
+            i = 0;
             while (row.hasNext()) {
                 String value = row.next().toString();
 
-                if (dataList.size() != columnNum) dataList.add(value);
+                if (i != columnNum) dataList.add(value);
+                i++;
             }
             if(dataList.size() == columns.size()) table.insert(dataList.toArray());
         }
