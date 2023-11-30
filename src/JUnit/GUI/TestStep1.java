@@ -31,23 +31,23 @@ public class TestStep1 {
 
     @Test
     public void testloadFIle(){
-        UserSelectFrame jUnitTestClass = new UserSelectFrame();
-        try {
-            Method method = jUnitTestClass.getClass().getDeclaredMethod("loadFile", String.class);
-            method.setAccessible(true);
-            File ret = (File) method.invoke(jUnitTestClass, new File("train.csv"));
-            assertEquals("train.csv", ret);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error loading File: " + e.getMessage());
-        }
-        UserSelectFrame userSelectFrame = new UserSelectFrame();
-        try{
-            userSelectFrame.loadFile("train.csv");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        UserSelectFrame jUnitTestClass = new UserSelectFrame();
+//        try {
+//            Method method = jUnitTestClass.getClass().getDeclaredMethod("loadFile", String.class);
+//            method.setAccessible(true);
+//            File ret = (File) method.invoke(jUnitTestClass, new File("train.csv"));
+//            assertEquals("train.csv", ret);
+//        } catch (NoSuchMethodException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(null, "Error loading File: " + e.getMessage());
+//        }
+//        UserSelectFrame userSelectFrame = new UserSelectFrame();
+//        try{
+//            userSelectFrame.loadFile("train.csv");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 }

@@ -2,6 +2,7 @@ package easyLearning.view.GUI;
 
 import com.holub.database.Database;
 import easyLearning.controller.DropColumnListener;
+import easyLearning.controller.DropNanListener;
 import easyLearning.controller.ImportListener;
 
 import javax.swing.*;
@@ -50,18 +51,7 @@ public class UserSelectFrame extends JFrame{
 
         importButton.addActionListener(new ImportListener(this));
         dropColumnButton.addActionListener(new DropColumnListener(this, table1));
-        dropNANButton.addActionListener(e -> {
-            try {
-                database.dropNaN(file);
-                String tableName = file.getName();
-                String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
-
-                loadCSVIntoTable(new File( "NANDropped_" + file.getName()));
-                updateTable();
-            } catch (Exception exception) {
-                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-            }
-        });
+        dropNANButton.addActionListener(new DropNanListener(this));
         submitButton.addActionListener(e -> {
             try {
                 new ResultFrame(file);
@@ -84,19 +74,6 @@ public class UserSelectFrame extends JFrame{
         updateTable();
     }
 
-    private void loadCSVIntoTable(File csvFile) {
-        try {
-            // Read CSV file and create a DefaultTableModel
-            DefaultTableModel model = createTableFromCSV(String.valueOf(csvFile));
-            this.table1.setModel(model);
-            makeTableUneditable();
-            scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-            updateTable();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error loading CSV into table: " + e.getMessage());
-        }
-    }
-
     private void makeTableUneditable(){
         // 편집 비활성화
         this.table1.setDefaultEditor(Object.class, null);
@@ -110,11 +87,6 @@ public class UserSelectFrame extends JFrame{
         // 열 이동 비활성화
         this.table1.getTableHeader().setReorderingAllowed(false);
     }
-
-    private void setFile(File file){
-        this.file = file;
-    }
-
 
 
     public void updateTable() {
@@ -132,50 +104,6 @@ public class UserSelectFrame extends JFrame{
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void loadFile(String sourceFilePath) throws IOException {
-
-        // 현재 작업 중인 프로젝트 폴더의 경로
-        String projectFolderPath = System.getProperty("user.dir");
-
-        // 복사 대상 파일의 이름
-        String fileName = new File(sourceFilePath).getName();
-
-        // 복사 대상 파일의 새로운 경로
-        String destinationFilePath = projectFolderPath + File.separator + fileName;
-
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-
-        try {
-            fis = new FileInputStream(sourceFilePath);
-            fos = new FileOutputStream(destinationFilePath);
-            System.out.println(sourceFilePath);
-            System.out.println(destinationFilePath);
-
-            byte[] buffer = new byte[1024];
-            int length;
-
-            while ((length = fis.read(buffer)) > 0) {
-                fos.write(buffer, 0, length);
-            }
-
-            System.out.println("파일이 성공적으로 복사되었습니다.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (fis != null) {
-                    fis.close();
-                }
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                System.err.println("파일 복사 중 오류가 발생했습니다: " + e.getMessage());
-            }
         }
     }
 }
