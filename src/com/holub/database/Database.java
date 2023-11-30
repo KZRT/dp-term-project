@@ -585,19 +585,66 @@ public final class Database {    /* The directory that represents the database.
         return false;
     }
 
-    public File dropColumn(File filepath, String dropColumnName) throws IOException {
-        String fileName = filepath.getName();
-        String filePath = Paths.get(filepath.getAbsolutePath()).getParent().toString();
+    public File dropColumn(File file, String dropColumnName) throws IOException {
+        String fileName = file.getName();
+        String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
 
-        return dropColumn(filePath, fileName, dropColumnName);
+        System.out.println("Dropping column " + dropColumnName + " from " + fileName + " in " + filePath);
+        FileReader fileReader = new FileReader(new File(filePath, fileName));
+        BufferedReader br = new BufferedReader(fileReader);
+        KaggleCSVImporter builder = new KaggleCSVImporter(br);
+        builder.startTable();
+
+        int i = 0;
+        int columnNum = 0;
+        List columns = new ArrayList<>();
+
+        Iterator columnNames = builder.loadColumnNames();
+        while (columnNames.hasNext()) {
+            String columnName = columnNames.next().toString();
+            if (columnName.compareTo(dropColumnName) == 0) {
+                columnNum = i;
+            } else columns.add(columnName);
+            i++;
+        }
+
+        Iterator row;
+
+        Table table = new ConcreteTable(fileName, (String [])columns.toArray(new String[0]));
+        table.begin();
+
+        while ((row = builder.loadRow()) != null) {
+            List dataList = new ArrayList<>();
+            while (row.hasNext()) {
+                String value = row.next().toString();
+
+                if (dataList.size() != columnNum) dataList.add(value);
+            }
+            if(dataList.size() == columns.size()) table.insert(dataList.toArray());
+        }
+        table.commit(true);
+        System.out.println("Dropped column " + dropColumnName + " from " + fileName + " in " + filePath);
+        System.out.println(table);
+        Writer out;
+        File fileToDrop = null;
+        if(fileName.startsWith("ColumnDropped_")){
+            fileToDrop = new File(filePath, fileName);
+        }
+        else {
+            fileToDrop = new File(filePath, "ColumnDropped_" + fileName);
+        }
+        out = new FileWriter(fileToDrop);
+        table.export(new KaggleCSVExporter(out));
+        out.close();
+        return fileToDrop;
     }
 
 
-    public File dropColumn(String fileName, String dropColumnName) throws IOException {
-        return dropColumn(location.getPath(), fileName, dropColumnName);
+    public void dropColumn(String fileName, String dropColumnName) throws IOException {
+        //return dropColumn(location.getPath(), fileName, dropColumnName);
     }
 
-    private File dropColumn(String filePath, String fileName, String dropColumnName) throws IOException {
+    /*private File dropColumn(String filePath, String fileName, String dropColumnName) throws IOException {
         System.out.println("Dropping column " + dropColumnName + " from " + fileName + " in " + filePath);
         FileReader file = new FileReader(new File(filePath, fileName));
         BufferedReader br = new BufferedReader(file);
@@ -646,22 +693,13 @@ public final class Database {    /* The directory that represents the database.
         table.export(new KaggleCSVExporter(out));
         out.close();
         return fileToDrop;
-    }
+    }*/
 
-    public File dropNaN(File filepath) throws IOException {
-        String fileName = filepath.getName();
-        String filePath = Paths.get(filepath.getAbsolutePath()).getParent().toString();
+    public File dropNaN(File file) throws IOException {
+        String fileName = file.getName();
+        String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
 
-        return dropNaN(filePath, fileName);
-    }
-
-    public File dropNaN(String fileName) throws IOException {
-        return dropNaN(location.getPath(), fileName);
-    }
-
-    private File dropNaN(String filePath, String fileName) throws IOException {
-        System.out.println("Dropping NaN from " + fileName + " in " + filePath);
-        FileReader fileReader = new FileReader(new File(filePath, fileName));
+        FileReader fileReader = new FileReader(file);
         BufferedReader br = new BufferedReader(fileReader);
         KaggleCSVImporter builder = new KaggleCSVImporter(br);
         builder.startTable();
@@ -707,6 +745,59 @@ public final class Database {    /* The directory that represents the database.
         writer.close();
         return fileToDrop;
     }
+
+    public void dropNaN(String fileName) throws IOException {
+        //return dropNaN(location.getPath(), fileName);
+    }
+
+    /*private File dropNaN(File file) throws IOException {
+        //System.out.println("Dropping NaN from " + fileName + " in " + filePath);
+        FileReader fileReader = new FileReader(file);
+        BufferedReader br = new BufferedReader(fileReader);
+        KaggleCSVImporter builder = new KaggleCSVImporter(br);
+        builder.startTable();
+
+        Iterator columnNames = builder.loadColumnNames();
+        ArrayList columns = new ArrayList<>();
+        int i = 0;
+        while (columnNames.hasNext()) {
+            String columnName = columnNames.next().toString();
+            columns.add(columnName);
+            i++;
+        }
+
+        Table table = new ConcreteTable(fileName, (String [])columns.toArray(new String[0]));
+        table.begin();
+
+        Iterator row;
+        while ((row = builder.loadRow()) != null) {
+            String[] dataArray = new String[builder.loadWidth()];
+            i = 0;
+            while (row.hasNext()) {
+                String value = row.next().toString();
+                if (isNaN(value)) {
+                    break;
+                } else {
+                    dataArray[i] = value;
+                    i++;
+                }
+            }
+
+            if (i == builder.loadWidth()) {
+                table.insert(dataArray);
+            }
+        }
+        table.commit(true);
+
+        System.out.println("Dropped NaN from " + fileName + " in " + filePath);
+        System.out.println(table);
+
+        File fileToDrop = new File(location, "NANDropped_" + fileName);
+        Writer writer = new FileWriter(fileToDrop);
+        table.export(new KaggleCSVExporter(writer));
+        writer.close();
+        return fileToDrop;
+    }*/
 
 
 
