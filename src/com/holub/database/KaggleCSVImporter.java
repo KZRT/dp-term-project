@@ -13,8 +13,7 @@ public class KaggleCSVImporter implements Table.Importer {
     private String[] columnNames;
     private String tableName;
 
-    public KaggleCSVImporter(String datasetName, Reader in) {
-        tableName = datasetName;
+    public KaggleCSVImporter(Reader in) {
         this.in = in instanceof BufferedReader ? (BufferedReader) in : new BufferedReader(in);
     }
 

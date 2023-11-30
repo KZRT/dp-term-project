@@ -27,7 +27,6 @@ public class ImportListener implements ActionListener {
             try {
                 userSelectFrame.setPleaseInsertFileFormatTextArea(file.getAbsolutePath());
                 userSelectFrame.setTable(controller.importCSVToTable(file));
-                userSelectFrame.updateTable();
             } catch (Exception exception) {
                 JOptionPane.showMessageDialog(null, exception.getMessage());
             }

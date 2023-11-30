@@ -26,6 +26,7 @@ public class DropColumnListener implements ActionListener {
             JTable droppedColumnTable = controller.dropColumn(selectedColumnName);
             userSelectFrame.setTable(droppedColumnTable);
         } catch (Exception exception) {
+            System.out.println(exception.getMessage());
             JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
         }
     }

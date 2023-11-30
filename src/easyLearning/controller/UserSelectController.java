@@ -28,14 +28,16 @@ public class UserSelectController implements Controller {
 
     public JTable importCSVToTable(File file) throws IOException {
         this.file = file;
-        Table table = TableFactory.create(new CSVImporter(new FileReader(file)));
+        Table table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
+        System.out.println(table);
         JTableExporter jTableExporter = new JTableExporter();
         table.export(jTableExporter);
         return jTableExporter.getJTable();
     }
 
     public JTable dropColumn(String columnName) throws IOException {
-        database.dropColumn(file, columnName);
-        return importCSVToTable(new File( "ColumnDropped_" + file.getName()));
+        File droppedFile = database.dropColumn(file, columnName);
+        System.out.println(droppedFile);
+        return importCSVToTable(droppedFile);
     }
 }
