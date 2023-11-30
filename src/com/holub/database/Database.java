@@ -47,124 +47,124 @@ import com.holub.tools.ThrowableContainer;
  *  <a href="http://www.holub.com/software/HolubSQL"
  *  >HolubSQL web page</a> for a few SQL references).
  *  <p>
- *	My intent is to do simple things, only.
- *	None of the niceties of SQL (like aliases, outer and inner joins,
- *	permissions, views, etc.) are supported.
- *	The file src/com/holub/database/Database.test.sql in the original
- *	distribution .jar file demonstrates the SQL subset that's supported.
- *	<p>
- *	A database is effectively a directory, and a table is effectively
- *	a file in the directory.
- *	The argument to USE DATABASE specifies
- *	the full path to that directory. A table name is a file name
- *	with the ".csv" extension added. Note that a simple name (as in
- *	"USE DATABASE foo" will create a subdirectory called "foo" in
- *	the current directory. Use a full path name to get something
- *	else: "USE DATABASE c:/tmp/foo"
- *	See {@link CSVExporter} for a description of the file format.
- *	<p>
- *	Because database names are path names, identifier names in general
- *	can contain characters that would normally go in a path
- *	(/ \ : ~ _) but they cannot contain a dot or dash (so your
- *	database name can't have a dot or dash in it either). Identifiers
- *	can't contain spaces, and they cannot start with digits.
- *	<p>
- *	SELECT statements support FROM and WHERE clauses, but nothing else.
- *	(DISTINCT, ORDEREDBY, etc., aren't supported; neither are subqueries.)
- *	You can join an arbitrary number of tables in a SELECT, but outer
- *	and inner joins (ans subqueries) aren't supported. A few operators
- *	(BETWEEN, IN) aren't supported---check the grammar, below.
- *	Any Java/Perl regular expression can be used as an argument to LIKE,
- *	and for SQL compatibility, a % wild card is automatically mapped to ".*".
- *	Selecting "into" another table works, but bear in mind that the actual
- *	data is shared between tables. Since everything in the table
- *	is a String, this strategy works fine <em>unless</em> you
- *	use the {@link Table} object that's returned from {@link #execute}
- *	to modify the table directly. Don't do that.
- *	<p>
- *	Though the following types are recognized by the parser (so you
- *	can use them in the SQL), but they are ignored. Everything's stored
- *	in the underlying database as a String. Strings that represent
- *	numbers (can be parsed successfully by {@link java.text.NumberFormat})
- *	can be used in arithmetic expressions, however.
- *	<table border=1 cellpadding=3 cellspacing=0>
- *	<tr><td>integer(maxDigits)<br>
- *			int(maxDigits)<br>
- *			smallint(maxDigits)<br>
- *			bigint(maxDigits)<br>
- *			tinyint(size)</td><td>integers</td></tr>
- *	<tr><td>decimal(l,r)<br>
- *			real(l,r)<br>
- *			double(l,r)<br>
- *			numeric(l,r)</td><td>floating point, l and r specify the maximum
- *			number of digits to the left and right of the decimal.</td></tr>
- *	<tr><td>char(length)</td><td>Fixed length string.</td></tr>
- *	<tr><td>varchar(maximum_length)</td><td>Variable length string.</td></tr>
- *	<tr><td>date(format)</td><td>Date in the Gregorian calendar with optional format.</td></tr>
- *	</table>
- *	You may specify a "PRIMARY KEY(identifier)" in the list of columns,
- *	but it's ignored, too.
- *	<p>
- *	Numbers in the input must begin with a digit (.10  doesn't work. 0.10 does),
- *	and decimal fractions less than 1.0E-20 are assumed to be 0.
- *	(That is 1.000000000000000000001 is rounded down to 1.0, and
- *	will be put into the table as the integer 1.
- *	<p>
- *	You can't
- *	store a Boolean value as such, but if you decide on some
- *	string like "true" and "false" as meaningful, and use it
- *	consistently, then comparisons and assignments of boolean
- *	values will work fine. Null is supported.
- *	<p>
- *	Simple transactions (in the sense of a group of SQL statements
- *	that execute atomically, which can be rolled back) are supported.
- *	Initially, no transaction is active, and all SQL requests are
- *	effectively committed immediately on execution.
- *	This auto-commit mode is superceded once you issue a BEGIN, but
- *	is reinstated as soon as the matching COMMIT or ROLLBACK is
- *	encountered. All requests that occur between the BEGIN
- *	and COMMIT are treated as a single unit. If you close (or DUMP)
- *	the database without a formal COMMIT or ROLLBACK, then any open
- *	transactions are effectively committed.
- *	The {@link #begin}, {@link #commit}, and {@link #rollback}
- *	methods have the same effect as issuing the equivalent SQL requests.
- *	<p>
- *	Transactions affect only modifications of tables.
- *	Tables that are created or dumped during a transaction are not
- *	destroyed (or put back in their original state on the disk)
- *	if that transaction is rolled back.
- *	<p>
- *	An exception-toss that occurs when processing a SQL
- *	expression submitted to {@link #execute} causes an automatic
- *	rollback before the exception is tossed out to your code.
- *	This automatic-rollback behavior <u>is not implemented</u> by
- *	the methods that mimic SQL statements
- *	({@link #useDatabase useDatabase(...)},
+ *  My intent is to do simple things, only.
+ *  None of the niceties of SQL (like aliases, outer and inner joins,
+ *  permissions, views, etc.) are supported.
+ *  The file src/com/holub/database/Database.test.sql in the original
+ *  distribution .jar file demonstrates the SQL subset that's supported.
+ *  <p>
+ *  A database is effectively a directory, and a table is effectively
+ *  a file in the directory.
+ *  The argument to USE DATABASE specifies
+ *  the full path to that directory. A table name is a file name
+ *  with the ".csv" extension added. Note that a simple name (as in
+ *  "USE DATABASE foo" will create a subdirectory called "foo" in
+ *  the current directory. Use a full path name to get something
+ *  else: "USE DATABASE c:/tmp/foo"
+ *  See {@link CSVExporter} for a description of the file format.
+ *  <p>
+ *  Because database names are path names, identifier names in general
+ *  can contain characters that would normally go in a path
+ *  (/ \ : ~ _) but they cannot contain a dot or dash (so your
+ *  database name can't have a dot or dash in it either). Identifiers
+ *  can't contain spaces, and they cannot start with digits.
+ *  <p>
+ *  SELECT statements support FROM and WHERE clauses, but nothing else.
+ *  (DISTINCT, ORDEREDBY, etc., aren't supported; neither are subqueries.)
+ *  You can join an arbitrary number of tables in a SELECT, but outer
+ *  and inner joins (ans subqueries) aren't supported. A few operators
+ *  (BETWEEN, IN) aren't supported---check the grammar, below.
+ *  Any Java/Perl regular expression can be used as an argument to LIKE,
+ *  and for SQL compatibility, a % wild card is automatically mapped to ".*".
+ *  Selecting "into" another table works, but bear in mind that the actual
+ *  data is shared between tables. Since everything in the table
+ *  is a String, this strategy works fine <em>unless</em> you
+ *  use the {@link Table} object that's returned from {@link #execute}
+ *  to modify the table directly. Don't do that.
+ *  <p>
+ *  Though the following types are recognized by the parser (so you
+ *  can use them in the SQL), but they are ignored. Everything's stored
+ *  in the underlying database as a String. Strings that represent
+ *  numbers (can be parsed successfully by {@link java.text.NumberFormat})
+ *  can be used in arithmetic expressions, however.
+ *  <table border=1 cellpadding=3 cellspacing=0>
+ *  <tr><td>integer(maxDigits)<br>
+ *        int(maxDigits)<br>
+ *        smallint(maxDigits)<br>
+ *        bigint(maxDigits)<br>
+ *        tinyint(size)</td><td>integers</td></tr>
+ *  <tr><td>decimal(l,r)<br>
+ *        real(l,r)<br>
+ *        double(l,r)<br>
+ *        numeric(l,r)</td><td>floating point, l and r specify the maximum
+ *        number of digits to the left and right of the decimal.</td></tr>
+ *  <tr><td>char(length)</td><td>Fixed length string.</td></tr>
+ *  <tr><td>varchar(maximum_length)</td><td>Variable length string.</td></tr>
+ *  <tr><td>date(format)</td><td>Date in the Gregorian calendar with optional format.</td></tr>
+ *  </table>
+ *  You may specify a "PRIMARY KEY(identifier)" in the list of columns,
+ *  but it's ignored, too.
+ *  <p>
+ *  Numbers in the input must begin with a digit (.10  doesn't work. 0.10 does),
+ *  and decimal fractions less than 1.0E-20 are assumed to be 0.
+ *  (That is 1.000000000000000000001 is rounded down to 1.0, and
+ *  will be put into the table as the integer 1.
+ *  <p>
+ *  You can't
+ *  store a Boolean value as such, but if you decide on some
+ *  string like "true" and "false" as meaningful, and use it
+ *  consistently, then comparisons and assignments of boolean
+ *  values will work fine. Null is supported.
+ *  <p>
+ *  Simple transactions (in the sense of a group of SQL statements
+ *  that execute atomically, which can be rolled back) are supported.
+ *  Initially, no transaction is active, and all SQL requests are
+ *  effectively committed immediately on execution.
+ *  This auto-commit mode is superceded once you issue a BEGIN, but
+ *  is reinstated as soon as the matching COMMIT or ROLLBACK is
+ *  encountered. All requests that occur between the BEGIN
+ *  and COMMIT are treated as a single unit. If you close (or DUMP)
+ *  the database without a formal COMMIT or ROLLBACK, then any open
+ *  transactions are effectively committed.
+ *  The {@link #begin}, {@link #commit}, and {@link #rollback}
+ *  methods have the same effect as issuing the equivalent SQL requests.
+ *  <p>
+ *  Transactions affect only modifications of tables.
+ *  Tables that are created or dumped during a transaction are not
+ *  destroyed (or put back in their original state on the disk)
+ *  if that transaction is rolled back.
+ *  <p>
+ *  An exception-toss that occurs when processing a SQL
+ *  expression submitted to {@link #execute} causes an automatic
+ *  rollback before the exception is tossed out to your code.
+ *  This automatic-rollback behavior <u>is not implemented</u> by
+ *  the methods that mimic SQL statements
+ *  ({@link #useDatabase useDatabase(...)},
  *    {@link #createDatabase createDatabase(...)},
  *    {@link #createTable createTable(...)},
  *    {@link #dropTable dropTable(...)}, and
  *    {@link #dump dump(...)}). If you use these methods, you'll
- *	have to catch any exceptions manually and call {@link #rollback}
- *	or {@link #commit} explicitly.
- *	<p>
- *	The modified database is not stored
- *	to disk until a DUMP is issued. (In the JDBC wrapper,
- *	an automatic DUMP occurs when you close the Connection).
- *	<p>
- *	This class wraps various {@link Table} derivatives, but this
- *	class also relies on the fact that the table is made up entirely
- *	of {@link String} objects. You can use this class to
- *	access {@link Table} objects that were created directly by
- *	yourself, but problems can arise if those manually created
- *	tables have	anything other than Strings in them. In particular,
+ *  have to catch any exceptions manually and call {@link #rollback}
+ *  or {@link #commit} explicitly.
+ *  <p>
+ *  The modified database is not stored
+ *  to disk until a DUMP is issued. (In the JDBC wrapper,
+ *  an automatic DUMP occurs when you close the Connection).
+ *  <p>
+ *  This class wraps various {@link Table} derivatives, but this
+ *  class also relies on the fact that the table is made up entirely
+ *  of {@link String} objects. You can use this class to
+ *  access {@link Table} objects that were created directly by
+ *  yourself, but problems can arise if those manually created
+ *  tables have    anything other than Strings in them. In particular,
  *    {@link Object#toString} method is used to get the value of
- *	a cell, and if the value is modified through an UPDATE, the
- *	new value is stored as a String, without regard to the
- *	original field type.)
- *	<p>
- *	Here's the grammar I've implemented ("expr"=expression,
- *	"id"=identifier, "opt"=optional, "e"=epsilon. "[...]" is
- *	an optional subproduction.
+ *  a cell, and if the value is modified through an UPDATE, the
+ *  new value is stored as a String, without regard to the
+ *  original field type.)
+ *  <p>
+ *  Here's the grammar I've implemented ("expr"=expression,
+ *  "id"=identifier, "opt"=optional, "e"=epsilon. "[...]" is
+ *  an optional subproduction.
  <PRE>
  statement       ::=
  INSERT  INTO IDENTIFIER [LP idList RP]
@@ -244,12 +244,12 @@ import com.holub.tools.ThrowableContainer;
  * <b>Modifications Since Publication of Holub on Patterns:</b>
  * <table border="1" cellspacing="0" cellpadding="3">
  * <tr><td valign="top">9/24/02</td>
- * 		<td>
- * 		Added a few methods to the Cursor interface (and
- * 		local implemenation) to make it possible to get
- * 		column-related metadata in the
+ *     <td>
+ *     Added a few methods to the Cursor interface (and
+ *     local implemenation) to make it possible to get
+ *     column-related metadata in the
  *        {@link java.sql.ResultSetMetaData} class.
- * 		</td>
+ *     </td>
  * </tr>
  * </table>
  *
@@ -586,58 +586,21 @@ public final class Database {    /* The directory that represents the database.
     }
 
     public void dropColumn(File filepath, String dropColumnName) throws IOException {
-        //FileReader file = new FileReader("c:/dp2023/" + tableName + ".csv");
-        String tableName = filepath.getName();
+        String fileName = filepath.getName();
         String filePath = Paths.get(filepath.getAbsolutePath()).getParent().toString();
-        FileReader file = new FileReader(new File(filePath, tableName));
-        BufferedReader br = new BufferedReader(file);
-        KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
-        builder.startTable();
 
-        int i = 0;
-        int columnNum = 0;
-        List columns = new ArrayList<>();
-
-        Iterator columnNames = builder.loadColumnNames();
-        while (columnNames.hasNext()) {
-            String columnName = columnNames.next().toString();
-            if (columnName.compareTo(dropColumnName) == 0) {
-                columnNum = i;
-            } else columns.add(columnName);
-            i++;
-        }
-
-        List dataList = new ArrayList<>();
-        Iterator row;
-
-        Table table = new ConcreteTable(tableName, (String [])columns.toArray(new String[0]));
-        table.begin();
-
-        while ((row = builder.loadRow()) != null) {
-            i = 0;
-            while (row.hasNext()) {
-                String value = row.next().toString();
-                if (i == columnNum) continue;
-                else {
-                    dataList.add(value);
-                }
-                i++;
-            }
-            if(dataList.size() == columns.size()) table.insert(dataList.toArray());
-        }
-        table.commit(true);
-
-        Writer out = new FileWriter(new File(location, "ColumnDropped_" + tableName));
-        table.export(new KaggleCSVExporter(out));
-        out.close();
+        dropColumn(filePath, fileName, dropColumnName);
     }
 
 
-    public void dropColumn(String tableName, String dropColumnName) throws IOException {
-        //FileReader file = new FileReader("c:/dp2023/" + tableName + ".csv");
-        FileReader file = new FileReader(new File(location, tableName));
+    public void dropColumn(String fileName, String dropColumnName) throws IOException {
+        dropColumn(location.getPath(), fileName, dropColumnName);
+    }
+
+    private void dropColumn(String filePath, String fileName, String dropColumnName) throws IOException {
+        FileReader file = new FileReader(new File(filePath, fileName));
         BufferedReader br = new BufferedReader(file);
-        KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
+        KaggleCSVImporter builder = new KaggleCSVImporter(fileName, br);
         builder.startTable();
 
         int i = 0;
@@ -653,33 +616,30 @@ public final class Database {    /* The directory that represents the database.
             i++;
         }
 
-        Table table = new ConcreteTable(tableName, (String [])columns.toArray(new String[0]));
+        Iterator row;
+
+        Table table = new ConcreteTable(fileName, (String [])columns.toArray(new String[0]));
         table.begin();
 
-        Iterator row;
         while ((row = builder.loadRow()) != null) {
             List dataList = new ArrayList<>();
-            i = 0;
             while (row.hasNext()) {
                 String value = row.next().toString();
-                if (i == columnNum) continue;
-                else {
-                    dataList.add(value);
-                }
-                i++;
-            }
 
+                if (dataList.size() != columnNum) dataList.add(value);
+            }
             if(dataList.size() == columns.size()) table.insert(dataList.toArray());
         }
         table.commit(true);
 
-        Writer out = new FileWriter(new File(location, "ColumnDropped_" + tableName));
+        Writer out;
+        if(fileName.startsWith("ColumnDropped_")) out = new FileWriter(new File(filePath, fileName));
+        else out = new FileWriter(new File(filePath, "ColumnDropped_" + fileName));
         table.export(new KaggleCSVExporter(out));
         out.close();
     }
 
     public void dropNaN(String tableName) throws IOException {
-        //FileReader file = new FileReader(new File(location, tableName + ".csv"));
         FileReader file = new FileReader(new File(location, "ColumnDropped_" + tableName));
         BufferedReader br = new BufferedReader(file);
         KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
@@ -723,9 +683,9 @@ public final class Database {    /* The directory that represents the database.
 
 
     public void dropNaN(File filepath) throws IOException {
-        //FileReader file = new FileReader(new File(location, tableName + ".csv"));
         String tableName = filepath.getName();
-        FileReader file = new FileReader("ColumnDropped_" + tableName);
+        String filePath = Paths.get(filepath.getAbsolutePath()).getParent().toString();
+        FileReader file = new FileReader(new File(filePath, "ColumnDropped_" + tableName));
         BufferedReader br = new BufferedReader(file);
         KaggleCSVImporter builder = new KaggleCSVImporter(tableName, br);
         builder.startTable();
@@ -761,7 +721,7 @@ public final class Database {    /* The directory that represents the database.
             }
         }
         table.commit(true);
-        Writer out = new FileWriter(new File(location, "dropped_" + tableName));
+        Writer out = new FileWriter(new File(location, "NaNDropped_" + tableName));
         table.export(new KaggleCSVExporter(out));
         out.close();
     }
@@ -861,11 +821,11 @@ public final class Database {    /* The directory that represents the database.
      *  commit has been seen), the transaction is rolled back.
      *
      *  @return a {@link Table} holding the result of a SELECT,
-     *  	or null for statements other than SELECT.
+     *      or null for statements other than SELECT.
      *  @param expression a String holding a single SQL statement. The
-     *  	complete statement must be present (you cannot break a long
-     *  	statement into multiple calls), and text
-     *  	following the SQL statement is ignored.
+     *      complete statement must be present (you cannot break a long
+     *      statement into multiple calls), and text
+     *      following the SQL statement is ignored.
      *  @throws com.holub.text.ParseFailure if the SQL is corrupt.
      *  @throws IOException Database files couldn't be accessed or created.
      *  @see #affectedRows()
@@ -1024,9 +984,9 @@ public final class Database {    /* The directory that represents the database.
         return null;
     }
     //----------------------------------------------------------------------
-    // idList			::= IDENTIFIER idList' | STAR
-    // idList'			::= COMMA IDENTIFIER idList'
-    // 					|	e
+    // idList         ::= IDENTIFIER idList' | STAR
+    // idList'        ::= COMMA IDENTIFIER idList'
+    //              |  e
     // Return a Collection holding the list of columns
     // or null if a * was found.
 
@@ -1046,12 +1006,12 @@ public final class Database {    /* The directory that represents the database.
     //----------------------------------------------------------------------
     // declarations  ::= IDENTIFIER [type] declaration'
     // declarations' ::= COMMA IDENTIFIER [type] [NOT [NULL]] declarations'
-    //				 |   e
+    //            |   e
     //
-    // type			 ::= INTEGER [ LP expr RP 				]
-    //				 |	 CHAR 	 [ LP expr RP				]
-    //				 |	 NUMERIC [ LP expr COMMA expr RP	]
-    //				 |	 DATE			// format spec is part of token
+    // type        ::= INTEGER [ LP expr RP           ]
+    //            |  CHAR   [ LP expr RP           ]
+    //            |  NUMERIC [ LP expr COMMA expr RP   ]
+    //            |  DATE        // format spec is part of token
 
     private List declarations() throws ParseFailure {
         List identifiers = new ArrayList();
@@ -1097,9 +1057,9 @@ public final class Database {    /* The directory that represents the database.
         return identifiers;
     }
 
-    // exprList 		::= 	  expr exprList'
-    // exprList'		::= COMMA expr exprList'
-    // 					|	e
+    // exprList        ::=      expr exprList'
+    // exprList'       ::= COMMA expr exprList'
+    //              |  e
 
     private List exprList() throws ParseFailure {
         List expressions = new LinkedList();
@@ -1129,9 +1089,9 @@ public final class Database {    /* The directory that represents the database.
         return left;
     }
 
-    // andExpr			::= 	relationalExpr andExpr'
-    // andExpr'			::= AND relationalExpr andExpr'
-    // 					|	e
+    // andExpr        ::=    relationalExpr andExpr'
+    // andExpr'       ::= AND relationalExpr andExpr'
+    //              |  e
 
     private com.holub.database.Database.Expression andExpr() throws ParseFailure {
         com.holub.database.Database.Expression left = relationalExpr();
@@ -1140,11 +1100,11 @@ public final class Database {    /* The directory that represents the database.
         return left;
     }
 
-    // relationalExpr ::=   		additiveExpr relationalExpr'
-    // relationalExpr'::=	  RELOP additiveExpr relationalExpr'
-    // 						| EQUAL additiveExpr relationalExpr'
-    // 						| LIKE  additiveExpr relationalExpr'
-    // 						| e
+    // relationalExpr ::=          additiveExpr relationalExpr'
+    // relationalExpr'::=     RELOP additiveExpr relationalExpr'
+    //                 | EQUAL additiveExpr relationalExpr'
+    //                 | LIKE  additiveExpr relationalExpr'
+    //                 | e
 
     private com.holub.database.Database.Expression relationalExpr() throws ParseFailure {
         com.holub.database.Database.Expression left = additiveExpr();
@@ -1167,9 +1127,9 @@ public final class Database {    /* The directory that represents the database.
         return left;
     }
 
-    // additiveExpr	::= 			 multiplicativeExpr additiveExpr'
-    // additiveExpr'	::= ADDITIVE multiplicativeExpr additiveExpr'
-    // 					|	e
+    // additiveExpr ::=           multiplicativeExpr additiveExpr'
+    // additiveExpr'    ::= ADDITIVE multiplicativeExpr additiveExpr'
+    //              |  e
 
     private com.holub.database.Database.Expression additiveExpr() throws ParseFailure {
         String lexeme;
@@ -1181,10 +1141,10 @@ public final class Database {    /* The directory that represents the database.
         return left;
     }
 
-    // multiplicativeExpr	::=       term multiplicativeExpr'
-    // multiplicativeExpr'	::= STAR  term multiplicativeExpr'
-    // 						|	SLASH term multiplicativeExpr'
-    // 						|	e
+    // multiplicativeExpr   ::=       term multiplicativeExpr'
+    // multiplicativeExpr'  ::= STAR  term multiplicativeExpr'
+    //                 |  SLASH term multiplicativeExpr'
+    //                 |  e
 
     private com.holub.database.Database.Expression multiplicativeExpr() throws ParseFailure {
         com.holub.database.Database.Expression left = term();
@@ -1198,9 +1158,9 @@ public final class Database {    /* The directory that represents the database.
         return left;
     }
 
-    // term				::=	NOT expr
-    // 					|	LP expr RP
-    // 					|	factor
+    // term          ::=    NOT expr
+    //              |  LP expr RP
+    //              |  factor
 
     private com.holub.database.Database.Expression term() throws ParseFailure {
         if (in.matchAdvance(NOT) != null) {
@@ -1212,10 +1172,10 @@ public final class Database {    /* The directory that represents the database.
         } else return factor();
     }
 
-    // factor			::= compoundId | STRING | NUMBER | NULL
-    // compoundId		::= IDENTIFIER compoundId'
-    // compoundId'		::= DOT IDENTIFIER
-    // 					|	e
+    // factor         ::= compoundId | STRING | NUMBER | NULL
+    // compoundId      ::= IDENTIFIER compoundId'
+    // compoundId'     ::= DOT IDENTIFIER
+    //              |  e
 
     private com.holub.database.Database.Expression factor() throws ParseFailure {
         try {
@@ -1376,7 +1336,7 @@ public final class Database {    /* The directory that represents the database.
             double r = ((com.holub.database.Database.NumericValue) rightValue).value();
 
             return new com.holub.database.Database.BooleanValue((operator == EQ) ? (l == r) : (operator == NE) ? (l != r) : (operator == LT) ? (l > r) : (operator == GT) ? (l < r) : (operator == LE) ? (l <= r) :
-                    /* operator == GE	 */   (l >= r));
+                    /* operator == GE    */   (l >= r));
         }
     }
 
@@ -1733,3 +1693,4 @@ public final class Database {    /* The directory that represents the database.
         }
     }
 }
+
