@@ -19,7 +19,7 @@ public interface Controller {
 
     public void removeEvaluation(String evaluation);
 
-    public void startClustering() throws IOException;
+    public void startClustering(String selectedColumnName) throws IOException;
 
     public void setDistanceMeasure(String distanceMeasure);
 

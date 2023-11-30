@@ -1,12 +1,9 @@
-package easyLearning.view.GUI;
+package easyLearning.view.GUI.parsing;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.nio.file.Paths;
+import java.io.File;
 
 import static easyLearning.view.GUI.FileTypeFilter.createTableFromCSV;
 

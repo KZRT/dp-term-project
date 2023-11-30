@@ -194,7 +194,7 @@ public class ClusteringFacade {
             System.out.println("Iteration " + i);
             Dataset[] clusters = this.cluster(data);
             double score = this.score(clusters);
-            results.add(new ClusteringResult(this.clusterer.getClass().getName(), this.clusterEvaluation.getClass().getName(), clusters, score));
+            results.add(new ClusteringResult(this.clusterer.getClass().getSimpleName(), this.clusterEvaluation.getClass().getSimpleName(), clusters, score));
             System.out.println("Iteration " + i + "Score: " + score);
         }
 

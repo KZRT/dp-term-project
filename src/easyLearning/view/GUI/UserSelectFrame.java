@@ -48,7 +48,7 @@ public class UserSelectFrame extends JFrame{
         importButton.addActionListener(new ImportListener(this));
         dropColumnButton.addActionListener(new DropColumnListener(this, table1));
         dropNANButton.addActionListener(new DropNanListener(this));
-        submitButton.addActionListener(new SubmitListener());
+        submitButton.addActionListener(new SubmitListener(table1));
         iterationButton.addActionListener(new IterationListener(this, iterationsTextField));
     }
 

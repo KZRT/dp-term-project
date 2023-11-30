@@ -30,6 +30,11 @@ public class KaggleCSVImporter implements Table.Importer {
     }
 
     public Iterator loadColumnNames() throws IOException {
+        System.out.println("CSVImporter.loadColumnNames " + columnNames);
+        for (int i = 0; i < columnNames.length; i++) {
+            System.out.print(columnNames[i] + " ");
+        }
+
         return new ArrayIterator(columnNames);  //{=CSVImporter.ArrayIteratorCall}
     }
 

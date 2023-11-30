@@ -585,11 +585,36 @@ public final class Database {    /* The directory that represents the database.
         return false;
     }
 
+    public int getColumnIndex(File file, String columnName) {
+        String fileName = file.getName();
+        String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
+
+        FileReader fileReader;
+        try {
+            fileReader = new FileReader(new File(filePath, fileName));
+            BufferedReader br = new BufferedReader(fileReader);
+            KaggleCSVImporter builder = new KaggleCSVImporter(br);
+            builder.startTable();
+
+            int i = 0;
+            Iterator columnNames = builder.loadColumnNames();
+            while (columnNames.hasNext()) {
+                String name = columnNames.next().toString();
+                if (name.compareTo(columnName) == 0) {
+                    return i;
+                }
+                i++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
     public File dropColumn(File file, String dropColumnName) throws IOException {
         String fileName = file.getName();
         String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
 
-        System.out.println("Dropping column " + dropColumnName + " from " + fileName + " in " + filePath);
         FileReader fileReader = new FileReader(new File(filePath, fileName));
         BufferedReader br = new BufferedReader(fileReader);
         KaggleCSVImporter builder = new KaggleCSVImporter(br);
@@ -625,8 +650,6 @@ public final class Database {    /* The directory that represents the database.
             if(dataList.size() == columns.size()) table.insert(dataList.toArray());
         }
         table.commit(true);
-        System.out.println("Dropped column " + dropColumnName + " from " + fileName + " in " + filePath);
-        System.out.println(table);
         Writer out;
         File fileToDrop = null;
         if(fileName.startsWith("ColumnDropped_")){
@@ -737,9 +760,6 @@ public final class Database {    /* The directory that represents the database.
             }
         }
         table.commit(true);
-
-        System.out.println("Dropped NaN from " + fileName + " in " + filePath);
-        System.out.println(table);
 
         File fileToDrop = new File(location, "NANDropped_" + fileName);
         Writer writer = new FileWriter(fileToDrop);

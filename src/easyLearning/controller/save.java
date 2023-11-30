@@ -1,21 +1,19 @@
 package easyLearning.controller;
 
-import easyLearning.model.*;
-import easyLearning.view.GUI.ResultFrame;
-import easyLearning.view.GUI.UserSelectFrame;
 import com.holub.database.*;
+import easyLearning.model.ClusteringFacade;
+import easyLearning.model.ClusteringResult;
+import easyLearning.view.GUI.UserSelectFrame;
 import net.sf.javaml.core.Dataset;
-import net.sf.javaml.core.DefaultDataset;
-import net.sf.javaml.distance.DistanceMeasure;
 import net.sf.javaml.tools.data.FileHandler;
 
 import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.Iterator;
 
-public class UserSelectController implements Controller {
-    private static UserSelectController userSelectController;
+public class save implements Controller {
+    private static save userSelectController;
     private final ClusteringFacade model;
     private final UserSelectFrame view;
     private Database database;
@@ -23,10 +21,13 @@ public class UserSelectController implements Controller {
     private final ArrayList<String> selectedEvaluations;
     private String distanceMeasure;
     private int iterations;
+    private ArrayList<ClusteringResult> results;
+    private ArrayList<String> columnNames;
+    private Table table;
 
     private File file;
 
-    private UserSelectController(ClusteringFacade model, UserSelectFrame view) {
+    private save(ClusteringFacade model, UserSelectFrame view) {
 
         this.model = new ClusteringFacade();
         System.out.println("UserSelectController " + this.model);
@@ -38,17 +39,16 @@ public class UserSelectController implements Controller {
         selectedEvaluations = new ArrayList<>();
     }
 
-    public static UserSelectController getInstance(ClusteringFacade model, UserSelectFrame view) {
+    public static save getInstance(ClusteringFacade model, UserSelectFrame view) {
         if (userSelectController == null) {
-            userSelectController = new UserSelectController(model, view);
+            userSelectController = new save(model, view);
         }
         return userSelectController;
     }
 
     public JTable importCSVToTable(File file) throws IOException {
         this.file = file;
-        Table table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
-        System.out.println(table);
+        this.table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
         JTableExporter jTableExporter = new JTableExporter();
         table.export(jTableExporter);
         return jTableExporter.getJTable();
@@ -59,13 +59,11 @@ public class UserSelectController implements Controller {
 
     public JTable dropColumn(String columnName) throws IOException {
         File droppedFile = database.dropColumn(file, columnName);
-        System.out.println(droppedFile);
         return importCSVToTable(droppedFile);
     }
 
     public JTable dropNan() throws IOException {
         File droppedFile = database.dropNaN(file);
-        System.out.println(droppedFile);
         return importCSVToTable(droppedFile);
     }
 
@@ -85,26 +83,23 @@ public class UserSelectController implements Controller {
         selectedEvaluations.remove(evaluation);
     }
 
-    public void startClustering(String targetColumnName) {
+    public void startClustering(String selectedColumnName) {
         Dataset dataset;
-        File targetFile = null;
-        int targetColumnIndex = 0;
+        File targetFile = new File("targetDataset.csv");
+        System.out.println("Start Clustering at " + file.getAbsolutePath());
+        int columnNum;
         try {
-            targetColumnIndex = database.getColumnIndex(file, targetColumnName);
-            System.out.println(targetColumnIndex);
-            Table table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
-            System.out.println(table);
-            FileWriter writer = new FileWriter("targetDataset.csv");
-            DatasetExporter datasetExporter = new DatasetExporter(writer);
+            columnNum = readColumnNames(selectedColumnName);
+            DatasetExporterTwo datasetExporter = new DatasetExporterTwo(new FileWriter(targetFile));
+            System.out.println("Start Exporting table: " + table.toString() + " to targetDataset.csv");
             table.export(datasetExporter);
-            writer.close();
-            targetFile = new File("targetDataset.csv");
-            dataset = FileHandler.loadDataset(targetFile, targetColumnIndex, ",");
+            System.out.println("Exporting finished");
+            dataset = FileHandler.loadDataset(targetFile, columnNum, ",");
             System.out.println(dataset.toString());
         } catch (IOException e) {
             throw new NullPointerException("Dataset is null");
         }
-        ArrayList<ClusteringResult> results = new ArrayList<>();
+        ArrayList<ClusteringResult> clusteringResults = new ArrayList<>();
         System.out.println(distanceMeasure);
         model.setDistanceMeasure(distanceMeasure);
         for (String method : selectedMethods) {
@@ -119,7 +114,7 @@ public class UserSelectController implements Controller {
                         System.out.println("Start Clustering");
                         ClusteringResult clusteringResult = model.getBestClustering(dataset, iterations);
                         clusteringResult.setMethod(clusteringResult.getMethod() + "-" + clusterCount);
-                        results.add(clusteringResult);
+                        clusteringResults.add(clusteringResult);
                     }
                 }
             } else {
@@ -127,18 +122,14 @@ public class UserSelectController implements Controller {
                     model.setClusterEvaluation(evaluation);
                     model.setClusterer(method);
                     ClusteringResult clusteringResult = model.getBestClustering(dataset, iterations);
-                    results.add(clusteringResult);
+                    clusteringResults.add(clusteringResult);
                 }
             }
         }
-        for (ClusteringResult result : results) {
+        for (ClusteringResult result : clusteringResults) {
             System.out.println(result);
-            ResultFrame frame = new ResultFrame();
-            frame.setClusteringMethod(result.getMethod());
-            frame.setEvaluationMethod(result.getEvaluationMethod());
-            frame.setScore(String.valueOf(result.getScore()));
-            frame.setClusterCount(String.valueOf(result.getClusters().length));
         }
+        this.results = clusteringResults;
     }
 
     private <T extends Enum<T>> T getEnumValue(Class<T> type, String str) {
@@ -151,5 +142,28 @@ public class UserSelectController implements Controller {
 
     public void setIterations(int iterations) {
         this.iterations = iterations;
+    }
+
+    private int readColumnNames(String selectedColumnName) throws IOException {
+        this.table.export(new KaggleCSVExporter(new FileWriter(file)));
+        FileReader fileReader = new FileReader(file);
+        BufferedReader br = new BufferedReader(fileReader);
+        KaggleCSVImporter builder = new KaggleCSVImporter(br);
+        this.columnNames = new ArrayList<>();
+        int i = 0;
+        int columnNum = 0;
+
+        Iterator iterator = builder.loadColumnNames();
+        while (iterator.hasNext()) {
+            String columnName = iterator.next().toString();
+            System.out.println(columnName);
+            columnNames.add(columnName);
+            if (columnName.equals(selectedColumnName)) {
+                columnNum = i;
+            }
+            i++;
+        }
+        System.out.println(columnNames + " " + columnNum);
+        return columnNum;
     }
 }

@@ -9,14 +9,19 @@ import java.io.IOException;
 
 public class SubmitListener implements ActionListener {
     private Controller controller;
+    private JTable table;
 
-    public SubmitListener() {
+    public SubmitListener(JTable table) {
         controller = UserSelectController.getInstance(null, null);
+        this.table = table;
     }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            controller.startClustering();
+            int selectedColumnNum = table.getSelectedColumn();
+            String selectedColumnName = table.getColumnName(selectedColumnNum);
+            controller.startClustering(selectedColumnName);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
