@@ -79,13 +79,11 @@ public class userSelectFrame extends JFrame{
                     int selectedColumnNum = table1.getSelectedColumn();
                     String selectedColumnName = table1.getColumnName(selectedColumnNum);
                     database.dropColumn(file, selectedColumnName);
-                    String tableName = file.getName();
-                    String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
 
-                    loadCSVIntoTable(new File( "ColumnDropped_" + tableName));
+                    loadCSVIntoTable(new File( "ColumnDropped_" + file.getName()));
                     updateTable();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
                 }
             }
         });
@@ -95,16 +93,25 @@ public class userSelectFrame extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 try {
                     database.dropNaN(file);
+                    String tableName = file.getName();
+                    String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
+
+                    loadCSVIntoTable(new File( "NANDropped_" + file.getName()));
                     updateTable();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
                 }
             }
         });
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ResultFrame();
+                try {
+                    new ResultFrame(file);
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
+                }
+
             }
         });
     }
@@ -177,6 +184,8 @@ public class userSelectFrame extends JFrame{
         try {
             fis = new FileInputStream(sourceFilePath);
             fos = new FileOutputStream(destinationFilePath);
+            System.out.println(sourceFilePath);
+            System.out.println(destinationFilePath);
 
             byte[] buffer = new byte[1024];
             int length;
