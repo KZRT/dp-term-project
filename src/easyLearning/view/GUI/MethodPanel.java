@@ -1,5 +1,7 @@
 package easyLearning.view.GUI;
 
+import easyLearning.controller.MethodListener;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -51,23 +53,5 @@ public class MethodPanel extends JPanel {
 
 }
 
-class MethodListener implements ActionListener {
-    private static List<String> selectedItems = new ArrayList<>();
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        JCheckBox source = (JCheckBox) e.getSource();
-
-        if (source.isSelected()) {
-            // 체크박스가 선택되었을 때
-            selectedItems.add(source.getText());
-        } else {
-            // 체크박스가 해제되었을 때
-            selectedItems.remove(source.getText());
-        }
-
-        // 선택된 항목들 출력
-        System.out.println("Selected Items: " + selectedItems);
-    }
-};
 
 

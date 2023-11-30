@@ -1,0 +1,15 @@
+AICScore
+BICScore
+HybridCentroidSimilarity
+HybridPairwiseSimilarities
+SumOfAveragePairwiseSimilarities
+SumOfCentroidSimilarities
+SumOfSquaredErrors
+TraceScatterMatrix
+CIndex
+Gamma
+GPlus
+MinMaxCut
+PointBiserial
+WB
+Tau
