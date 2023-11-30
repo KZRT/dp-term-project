@@ -35,6 +35,9 @@ public class UserSelectController implements Controller {
         return jTableExporter.getJTable();
     }
 
+    public void exportTableToCSV(File file) throws IOException {
+    }
+
     public JTable dropColumn(String columnName) throws IOException {
         File droppedFile = database.dropColumn(file, columnName);
         System.out.println(droppedFile);
