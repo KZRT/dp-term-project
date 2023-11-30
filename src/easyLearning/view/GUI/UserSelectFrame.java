@@ -1,10 +1,7 @@
 package easyLearning.view.GUI;
 
 import com.holub.database.Database;
-import easyLearning.controller.DropColumnListener;
-import easyLearning.controller.DropNanListener;
-import easyLearning.controller.ImportListener;
-import easyLearning.controller.SubmitListener;
+import easyLearning.controller.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -101,16 +98,7 @@ public class UserSelectFrame extends JFrame{
             }
             //DMComboBox.addActionListener(new DistanceMeasurementListener());
             // 이벤트 리스너 등록
-            DMComboBox.addActionListener(new ActionListener() {
-                private String selectedDMValue = "AngularDistance";
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // 선택된 항목 가져오기
-                    String selectedDMValue = (String) DMComboBox.getSelectedItem();
-                    // 레이블에 선택된 항목 표시
-                    System.out.println("Selected Item: " + selectedDMValue);
-                }
-            });
+            DMComboBox.addActionListener(new DMListener(this, DMComboBox));
 
         } catch (IOException e) {
             e.printStackTrace();

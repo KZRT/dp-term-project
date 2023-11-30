@@ -84,7 +84,7 @@ public class UserSelectController implements Controller {
         Dataset[][] clusteringResults = new Dataset[selectedMethods.size()][];
         Dataset dataset = FileHandler.loadDataset(file, 0, ",");
         double[][] scores = new double[selectedMethods.size()][selectedEvaluations.size()];
-        model.setDistanceMeasure(distanceMeasure.toString());
+        model.setDistanceMeasure(distanceMeasure);
         for (String method : selectedMethods) {
             for (String evaluation : selectedEvaluations) {
                 model.setClusterer(method);
@@ -105,5 +105,9 @@ public class UserSelectController implements Controller {
 
     private <T extends Enum<T>> T getEnumValue(Class<T> type, String str) {
         return Enum.valueOf(type, str);
+    }
+
+    public void setDistanceMeasure(String distanceMeasure) {
+        this.distanceMeasure = distanceMeasure;
     }
 }

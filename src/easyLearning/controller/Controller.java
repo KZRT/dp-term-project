@@ -20,4 +20,6 @@ public interface Controller {
     public void removeEvaluation(String evaluation);
 
     public void startClustering() throws IOException;
+
+    public void setDistanceMeasure(String distanceMeasure);
 }
