@@ -89,8 +89,10 @@ public class UserSelectController implements Controller {
         try {
             Table table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
             System.out.println(table);
-            DatasetExporter datasetExporter = new DatasetExporter(new FileWriter("targetDataset.csv"));
+            FileWriter writer = new FileWriter("targetDataset.csv");
+            DatasetExporter datasetExporter = new DatasetExporter(writer);
             table.export(datasetExporter);
+            writer.close();
             targetFile = new File("targetDataset.csv");
             dataset = FileHandler.loadDataset(targetFile, 0, ",");
             System.out.println(dataset.toString());
