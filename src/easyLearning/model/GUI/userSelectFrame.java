@@ -85,7 +85,7 @@ public class userSelectFrame extends JFrame{
                     loadCSVIntoTable(new File( "ColumnDropped_" + tableName));
                     updateTable();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
                 }
             }
         });
@@ -97,14 +97,19 @@ public class userSelectFrame extends JFrame{
                     database.dropNaN(file);
                     updateTable();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, exception.getMessage());
+                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
                 }
             }
         });
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ResultFrame();
+                try {
+                    new ResultFrame(file);
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
+                }
+
             }
         });
     }
@@ -177,6 +182,8 @@ public class userSelectFrame extends JFrame{
         try {
             fis = new FileInputStream(sourceFilePath);
             fos = new FileOutputStream(destinationFilePath);
+            System.out.println(sourceFilePath);
+            System.out.println(destinationFilePath);
 
             byte[] buffer = new byte[1024];
             int length;
