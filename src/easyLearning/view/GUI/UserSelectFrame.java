@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static easyLearning.view.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -97,13 +99,32 @@ public class UserSelectFrame extends JFrame{
     private void populateDropdown() {
         // 텍스트 파일을 읽어와서 드롭다운 버튼에 추가
         String filePath = "src/easyLearning/model/parsing/DistanceMeasurement.txt";
+
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 DMComboBox.addItem(line);
             }
+            //DMComboBox.addActionListener(new DistanceMeasurementListener());
+            // 이벤트 리스너 등록
+            DMComboBox.addActionListener(new ActionListener() {
+                private String selectedDMValue = "AngularDistance";
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // 선택된 항목 가져오기
+                    String selectedDMValue = (String) DMComboBox.getSelectedItem();
+                    // 레이블에 선택된 항목 표시
+                    System.out.println("Selected Item: " + selectedDMValue);
+                }
+            });
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+
 }
+
+
