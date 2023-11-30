@@ -79,10 +79,8 @@ public class userSelectFrame extends JFrame{
                     int selectedColumnNum = table1.getSelectedColumn();
                     String selectedColumnName = table1.getColumnName(selectedColumnNum);
                     database.dropColumn(file, selectedColumnName);
-                    String tableName = file.getName();
-                    String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
 
-                    loadCSVIntoTable(new File( "ColumnDropped_" + tableName));
+                    loadCSVIntoTable(new File( "ColumnDropped_" + file.getName()));
                     updateTable();
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
@@ -95,6 +93,10 @@ public class userSelectFrame extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 try {
                     database.dropNaN(file);
+                    String tableName = file.getName();
+                    String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
+
+                    loadCSVIntoTable(new File( "NANDropped_" + file.getName()));
                     updateTable();
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
