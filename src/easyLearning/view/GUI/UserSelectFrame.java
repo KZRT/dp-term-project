@@ -4,6 +4,7 @@ import com.holub.database.Database;
 import easyLearning.controller.DropColumnListener;
 import easyLearning.controller.DropNanListener;
 import easyLearning.controller.ImportListener;
+import easyLearning.controller.SubmitListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -54,14 +55,7 @@ public class UserSelectFrame extends JFrame{
         importButton.addActionListener(new ImportListener(this));
         dropColumnButton.addActionListener(new DropColumnListener(this, table1));
         dropNANButton.addActionListener(new DropNanListener(this));
-        submitButton.addActionListener(e -> {
-            try {
-                new ResultFrame(file);
-            } catch (Exception exception) {
-                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-            }
-
-        });
+        submitButton.addActionListener(new SubmitListener());
     }
 
     public void setPleaseInsertFileFormatTextArea(String text){

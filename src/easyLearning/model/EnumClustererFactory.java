@@ -53,5 +53,4 @@ public enum EnumClustererFactory {
         return clusterer;
     }
     abstract protected Clusterer createClusterer(int clusterCount, DistanceMeasure dm);
-
 }
