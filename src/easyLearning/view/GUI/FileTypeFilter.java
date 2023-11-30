@@ -1,4 +1,4 @@
-package easyLearning.model.GUI;
+package easyLearning.view.GUI;
 
 import java.io.BufferedReader;
 import java.io.File;

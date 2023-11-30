@@ -1,6 +1,4 @@
-package easyLearning.model.GUI;
-
-import com.holub.database.Database;
+package easyLearning.view.GUI;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -10,7 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.file.Paths;
 
-import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
+import static easyLearning.view.GUI.FileTypeFilter.createTableFromCSV;
 
 public class ResultFrame extends JFrame{
     private JTable table1;

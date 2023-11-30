@@ -1,4 +1,4 @@
-package easyLearning.model.GUI;
+package easyLearning.view.GUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,23 +8,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MethodPanel extends JPanel {
+public class CheckboxListFromTextFile extends JFrame {
 
-    List<JCheckBox> checkBoxList;
-    Color color1;
-
-    public MethodPanel(){
+    public CheckboxListFromTextFile() {
+        super("Checkbox List from Text File");
 
         // 파일 경로를 수정하세요.
         String filePath = "src/easyLearning/model/parsing/Method.txt";
 
         List<JCheckBox> checkBoxList = createCheckboxList(filePath);
 
-        setLayout(new GridLayout(4, 2));
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(checkBoxList.size(), 1));
 
         for (JCheckBox checkBox : checkBoxList) {
-            add(checkBox);
+            panel.add(checkBox);
         }
+
+        add(panel);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(300, 300);
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
     private List<JCheckBox> createCheckboxList(String filePath) {
@@ -43,5 +49,7 @@ public class MethodPanel extends JPanel {
         return checkBoxList;
     }
 
-
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new CheckboxListFromTextFile());
+    }
 }

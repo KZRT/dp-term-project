@@ -1,9 +1,9 @@
 package easyLearning.Application;
 
-import easyLearning.model.GUI.userSelectFrame;
+import easyLearning.view.GUI.UserSelectFrame;
 
 public class Application {
     public static void main(String[] args) {
-        new userSelectFrame();
+        new UserSelectFrame();
     }
 }

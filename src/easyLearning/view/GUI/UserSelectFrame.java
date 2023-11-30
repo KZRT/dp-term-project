@@ -1,7 +1,6 @@
-package easyLearning.model.GUI;
+package easyLearning.view.GUI;
 
 import com.holub.database.Database;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -9,14 +8,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static easyLearning.model.GUI.FileTypeFilter.createTableFromCSV;
+import static easyLearning.view.GUI.FileTypeFilter.createTableFromCSV;
 
 
-public class userSelectFrame extends JFrame{
+public class UserSelectFrame extends JFrame{
 
     private JPanel MainPanel;
     private JButton importButton;
@@ -32,7 +29,7 @@ public class userSelectFrame extends JFrame{
 
     private Database database;
 
-    public userSelectFrame() {
+    public UserSelectFrame() {
         SwingUtilities.invokeLater(() -> {
                     setContentPane(MainPanel);
 
@@ -71,48 +68,37 @@ public class userSelectFrame extends JFrame{
 
             }
         });
-        dropColumnButton.addActionListener(new ActionListener() {
+        dropColumnButton.addActionListener(e -> {
+            try {
+                int selectedColumnNum = table1.getSelectedColumn();
+                String selectedColumnName = table1.getColumnName(selectedColumnNum);
+                database.dropColumn(file, selectedColumnName);
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int selectedColumnNum = table1.getSelectedColumn();
-                    String selectedColumnName = table1.getColumnName(selectedColumnNum);
-                    database.dropColumn(file, selectedColumnName);
-
-                    loadCSVIntoTable(new File( "ColumnDropped_" + file.getName()));
-                    updateTable();
-                } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-                }
+                loadCSVIntoTable(new File( "ColumnDropped_" + file.getName()));
+                updateTable();
+            } catch (Exception exception) {
+                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
             }
         });
-        dropNANButton.addActionListener(new ActionListener() {
+        dropNANButton.addActionListener(e -> {
+            try {
+                database.dropNaN(file);
+                String tableName = file.getName();
+                String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    database.dropNaN(file);
-                    String tableName = file.getName();
-                    String filePath = Paths.get(file.getAbsolutePath()).getParent().toString();
-
-                    loadCSVIntoTable(new File( "NANDropped_" + file.getName()));
-                    updateTable();
-                } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-                }
+                loadCSVIntoTable(new File( "NANDropped_" + file.getName()));
+                updateTable();
+            } catch (Exception exception) {
+                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
             }
         });
-        submitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    new ResultFrame(file);
-                } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-                }
-
+        submitButton.addActionListener(e -> {
+            try {
+                new ResultFrame(file);
+            } catch (Exception exception) {
+                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
             }
+
         });
     }
 
