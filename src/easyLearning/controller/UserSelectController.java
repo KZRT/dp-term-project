@@ -20,6 +20,7 @@ public class UserSelectController implements Controller {
     private final ArrayList<String> selectedMethods;
     private final ArrayList<String> selectedEvaluations;
     private String distanceMeasure;
+    private int iterations;
 
     private File file;
 
@@ -29,6 +30,7 @@ public class UserSelectController implements Controller {
         System.out.println("UserSelectController " + this.model);
         this.view = view;
         database = new Database();
+        this.iterations = 100;
 
         selectedMethods = new ArrayList<>();
         selectedEvaluations = new ArrayList<>();
@@ -83,9 +85,15 @@ public class UserSelectController implements Controller {
 
     public void startClustering() {
         Dataset dataset;
+        File targetFile = null;
         try {
-            System.out.println(file);
-            dataset = FileHandler.loadDataset(file, 0, ",");
+            Table table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
+            System.out.println(table);
+            DatasetExporter datasetExporter = new DatasetExporter(new FileWriter("targetDataset.csv"));
+            table.export(datasetExporter);
+            targetFile = new File("targetDataset.csv");
+            dataset = FileHandler.loadDataset(targetFile, 0, ",");
+            System.out.println(dataset.toString());
         } catch (IOException e) {
             throw new NullPointerException("Dataset is null");
         }
@@ -102,7 +110,7 @@ public class UserSelectController implements Controller {
                         model.setClusterEvaluation(evaluation);
                         model.setClusterer(method);
                         System.out.println("Start Clustering");
-                        ClusteringResult clusteringResult = model.getBestClustering(dataset, 200);
+                        ClusteringResult clusteringResult = model.getBestClustering(dataset, iterations);
                         clusteringResult.setMethod(clusteringResult.getMethod() + "-" + clusterCount);
                         results.add(clusteringResult);
                     }
@@ -111,7 +119,7 @@ public class UserSelectController implements Controller {
                 for (String evaluation : selectedEvaluations) {
                     model.setClusterEvaluation(evaluation);
                     model.setClusterer(method);
-                    ClusteringResult clusteringResult = model.getBestClustering(dataset, 200);
+                    ClusteringResult clusteringResult = model.getBestClustering(dataset, iterations);
                     results.add(clusteringResult);
                 }
             }
@@ -127,5 +135,9 @@ public class UserSelectController implements Controller {
 
     public void setDistanceMeasure(String distanceMeasure) {
         this.distanceMeasure = distanceMeasure;
+    }
+
+    public void setIterations(int iterations) {
+        this.iterations = iterations;
     }
 }

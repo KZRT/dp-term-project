@@ -191,9 +191,11 @@ public class ClusteringFacade {
 
         ArrayList<ClusteringResult> results = new ArrayList<>();
         for (int i = 0; i < iterations; i++) {
-            Dataset[] clusters = this.clusterer.cluster(data);
-            double score = this.clusterEvaluation.score(clusters);
-            results.add(new ClusteringResult(this.clusterer.toString(), this.clusterEvaluation.toString(), clusters, score));
+            System.out.println("Iteration " + i);
+            Dataset[] clusters = this.cluster(data);
+            double score = this.score(clusters);
+            results.add(new ClusteringResult(this.clusterer.getClass().getName(), this.clusterEvaluation.getClass().getName(), clusters, score));
+            System.out.println("Iteration " + i + "Score: " + score);
         }
 
         Collections.sort(results);

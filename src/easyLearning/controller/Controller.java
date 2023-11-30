@@ -22,4 +22,6 @@ public interface Controller {
     public void startClustering() throws IOException;
 
     public void setDistanceMeasure(String distanceMeasure);
+
+    public void setIterations(int iterations);
 }

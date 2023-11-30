@@ -49,14 +49,7 @@ public class UserSelectFrame extends JFrame{
         dropColumnButton.addActionListener(new DropColumnListener(this, table1));
         dropNANButton.addActionListener(new DropNanListener(this));
         submitButton.addActionListener(new SubmitListener());
-        iterationButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // 버튼이 클릭되었을 때 실행되는 부분
-                String text = iterationsTextField.getText(); // JTextField에서 텍스트 읽어오기
-                System.out.println( "입력된 값: " + text);
-            }
-        });
+        iterationButton.addActionListener(new IterationListener(this, iterationsTextField));
     }
 
     public void setPleaseInsertFileFormatTextArea(String text){
