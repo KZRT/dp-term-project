@@ -2,6 +2,7 @@ package easyLearning.controller;
 
 import easyLearning.model.*;
 import easyLearning.view.GUI.ResultFrame;
+import easyLearning.view.GUI.ResultFrameTwo;
 import easyLearning.view.GUI.UserSelectFrame;
 import com.holub.database.*;
 import net.sf.javaml.core.Dataset;
@@ -86,6 +87,7 @@ public class UserSelectController implements Controller {
     }
 
     public void startClustering(String targetColumnName) {
+        ArrayList<String> activeMethods = new ArrayList<>();
         Dataset dataset;
         File targetFile = null;
         int targetColumnIndex = 0;
@@ -111,6 +113,7 @@ public class UserSelectController implements Controller {
             if (method.equals("KMeans") || method.equals("KMedoids") || method.equals("FarthestFirst")) {
                 System.out.println(method);
                 for (int clusterCount = 2; clusterCount < 10; clusterCount++) {
+                    activeMethods.add(method + "-" + clusterCount);
                     model.setClusterSize(clusterCount);
                     for (String evaluation : selectedEvaluations) {
                         System.out.println(evaluation);
@@ -123,6 +126,7 @@ public class UserSelectController implements Controller {
                     }
                 }
             } else {
+                activeMethods.add(method);
                 for (String evaluation : selectedEvaluations) {
                     model.setClusterEvaluation(evaluation);
                     model.setClusterer(method);
@@ -131,14 +135,39 @@ public class UserSelectController implements Controller {
                 }
             }
         }
-        for (ClusteringResult result : results) {
-            System.out.println(result);
-            ResultFrame frame = new ResultFrame();
-            frame.setClusteringMethod(result.getMethod());
-            frame.setEvaluationMethod(result.getEvaluationMethod());
-            frame.setScore(String.valueOf(result.getScore()));
-            frame.setClusterCount(String.valueOf(result.getClusters().length));
+//        for (ClusteringResult result : results) {
+//            System.out.println(result);
+//            ResultFrame frame = new ResultFrame();
+//            frame.setClusteringMethod(result.getMethod());
+//            frame.setEvaluationMethod(result.getEvaluationMethod());
+//            frame.setScore(String.valueOf(result.getScore()));
+//            frame.setClusterCount(String.valueOf(result.getClusters().length));
+//        }
+
+        // sort with method and evaluation with double[][] scores
+        // show result in ResultFrame
+        double[][] scores = new double[activeMethods.size()][selectedEvaluations.size()];
+
+        for (int i = 0; i < activeMethods.size(); i++) {
+            for (int j = 0; j < selectedEvaluations.size(); j++) {
+                for (ClusteringResult result : results) {
+                    if (Objects.equals(result.getMethod(), activeMethods.get(i)) && Objects.equals(result.getEvaluationMethod(), selectedEvaluations.get(j))) {
+                        scores[i][j] = result.getScore();
+                    }
+                }
+            }
         }
+
+        String[] methods = new String[activeMethods.size()];
+        String[] evaluations = new String[selectedEvaluations.size()];
+        for (int i = 0; i < activeMethods.size(); i++) {
+            methods[i] = activeMethods.get(i);
+        }
+        for (int i = 0; i < selectedEvaluations.size(); i++) {
+            evaluations[i] = selectedEvaluations.get(i);
+        }
+
+        ResultFrameTwo frame = new ResultFrameTwo(methods, evaluations, scores);
     }
 
     private <T extends Enum<T>> T getEnumValue(Class<T> type, String str) {
