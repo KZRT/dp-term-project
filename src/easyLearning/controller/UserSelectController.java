@@ -24,19 +24,21 @@ public class UserSelectController implements Controller {
     private final ArrayList<String> selectedEvaluations;
     private String distanceMeasure;
     private int iterations;
+    private DistanceMeasureFactory distanceMeasureFactory;
 
     private File file;
 
     private UserSelectController(ClusteringFacade model, UserSelectFrame view) {
 
         this.model = new ClusteringFacade();
-        System.out.println("UserSelectController " + this.model);
         this.view = view;
         database = new Database();
         this.iterations = 100;
 
         selectedMethods = new ArrayList<>();
         selectedEvaluations = new ArrayList<>();
+        this.distanceMeasure = "EuclideanDistance";
+        distanceMeasureFactory = DistanceMeasureFactory.getInstance();
     }
 
     public static UserSelectController getInstance(ClusteringFacade model, UserSelectFrame view) {
@@ -46,6 +48,7 @@ public class UserSelectController implements Controller {
         return userSelectController;
     }
 
+    @Override
     public JTable importCSVToTable(File file) throws IOException {
         this.file = file;
         Table table = TableFactory.create(new KaggleCSVImporter(new FileReader(file)));
@@ -55,37 +58,41 @@ public class UserSelectController implements Controller {
         return jTableExporter.getJTable();
     }
 
-    public void exportTableToCSV(File file) throws IOException {
-    }
-
+    @Override
     public JTable dropColumn(String columnName) throws IOException {
         File droppedFile = database.dropColumn(file, columnName);
         System.out.println(droppedFile);
         return importCSVToTable(droppedFile);
     }
 
+    @Override
     public JTable dropNan() throws IOException {
         File droppedFile = database.dropNaN(file);
         System.out.println(droppedFile);
         return importCSVToTable(droppedFile);
     }
 
+    @Override
     public void addMethod(String method) {
         selectedMethods.add(method);
     }
 
+    @Override
     public void removeMethod(String method) {
         selectedMethods.remove(method);
     }
 
+    @Override
     public void addEvaluation(String evaluation) {
         selectedEvaluations.add(evaluation);
     }
 
+    @Override
     public void removeEvaluation(String evaluation) {
         selectedEvaluations.remove(evaluation);
     }
 
+    @Override
     public void startClustering(String targetColumnName) {
         ArrayList<String> activeMethods = new ArrayList<>();
         Dataset dataset;
@@ -116,11 +123,8 @@ public class UserSelectController implements Controller {
                     activeMethods.add(method + "-" + clusterCount);
                     model.setClusterSize(clusterCount);
                     for (String evaluation : selectedEvaluations) {
-                        System.out.println(evaluation);
-                        model.setClusterEvaluation(evaluation);
-                        model.setClusterer(method);
                         System.out.println("Start Clustering");
-                        ClusteringResult clusteringResult = model.getBestClustering(dataset, iterations);
+                        ClusteringResult clusteringResult = model.getBestClustering(method, evaluation, distanceMeasure, dataset, iterations);
                         clusteringResult.setMethod(clusteringResult.getMethod() + "-" + clusterCount);
                         results.add(clusteringResult);
                     }
@@ -130,7 +134,7 @@ public class UserSelectController implements Controller {
                 for (String evaluation : selectedEvaluations) {
                     model.setClusterEvaluation(evaluation);
                     model.setClusterer(method);
-                    ClusteringResult clusteringResult = model.getBestClustering(dataset, iterations);
+                    ClusteringResult clusteringResult = model.getBestClustering(method, evaluation, distanceMeasure, dataset, iterations);
                     results.add(clusteringResult);
                 }
             }
@@ -170,14 +174,12 @@ public class UserSelectController implements Controller {
         ResultFrameTwo frame = new ResultFrameTwo(methods, evaluations, scores);
     }
 
-    private <T extends Enum<T>> T getEnumValue(Class<T> type, String str) {
-        return Enum.valueOf(type, str);
-    }
-
+    @Override
     public void setDistanceMeasure(String distanceMeasure) {
         this.distanceMeasure = distanceMeasure;
     }
 
+    @Override
     public void setIterations(int iterations) {
         this.iterations = iterations;
     }

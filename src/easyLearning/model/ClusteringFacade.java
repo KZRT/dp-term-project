@@ -15,18 +15,18 @@ public class ClusteringFacade {
     private DistanceMeasureFactory distanceMeasureFactory;
     private DistanceMeasure distanceMeasure = null;
     private Dataset dataset = null;
+    private int clusterSize = 2;
     public ClusteringFacade() {
         clustererFactory = ClustererFactory.getInstance();
         distanceMeasureFactory = DistanceMeasureFactory.getInstance();
     }
 
     public void setClusterer(String clustererType) throws NullPointerException {
-        this.clusterer = clustererFactory.createClusterer(clustererType);
+        this.clusterer = getEnumValue(EnumClustererFactory.class, clustererType).createClusterer(this.clusterSize, this.distanceMeasure);
     }
 
     public void setClusterEvaluation(String clusterEvaluationType) throws NullPointerException {
-        if(this.distanceMeasure != null) clustererFactory.setDistanceMeasure(this.distanceMeasure);
-        this.clusterEvaluation = clustererFactory.createClusterEvaluation(clusterEvaluationType);
+        this.clusterEvaluation = getEnumValue(EnumClusterEvaluationFactory.class, clusterEvaluationType).createClusterEvaluation(this.distanceMeasure);
     }
 
     public void setDistanceMeasure(String distanceMeasureType) throws NullPointerException {
@@ -35,7 +35,7 @@ public class ClusteringFacade {
     }
 
     public void setClusterSize(int clusters) {
-        this.clustererFactory.setClusterSize(clusters);
+        this.clusterSize = clusters;
     }
 
     public void setDataset(Dataset dataset) {
@@ -46,6 +46,7 @@ public class ClusteringFacade {
         if(this.clusterer == null) {
             throw new NullPointerException("Set clusterer first!");
         }
+        System.out.println(this.clusterer);
         return this.clusterer.cluster(data);
     }
 
@@ -184,13 +185,14 @@ public class ClusteringFacade {
         return scores;
     }
 
-    public ClusteringResult getBestClustering(Dataset data, int iterations) {
-        if(this.clusterEvaluation == null) {
-            throw new NullPointerException("Set cluster evaluation first!");
-        }
+    public ClusteringResult getBestClustering(String method, String evaluation, String distanceMeasurement, Dataset data, int iterations) {
 
         ArrayList<ClusteringResult> results = new ArrayList<>();
         for (int i = 0; i < iterations; i++) {
+            this.dataset = data;
+            this.setDistanceMeasure(distanceMeasurement);
+            this.setClusterEvaluation(evaluation);
+            this.setClusterer(method);
             System.out.println("Iteration " + i);
             Dataset[] clusters = this.cluster(data);
             double score = this.score(clusters);
@@ -201,5 +203,9 @@ public class ClusteringFacade {
         Collections.sort(results);
         System.out.println(results.get(0).toString());
         return results.get(0);
+    }
+
+    private <T extends Enum<T>> T getEnumValue(Class<T> type, String str) {
+        return Enum.valueOf(type, str);
     }
 }
