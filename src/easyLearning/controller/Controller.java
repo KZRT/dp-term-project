@@ -18,4 +18,8 @@ public interface Controller {
     public void addEvaluation(String evaluation);
 
     public void removeEvaluation(String evaluation);
+
+    public void startClustering() throws IOException;
+
+    public void setDistanceMeasure(String distanceMeasure);
 }

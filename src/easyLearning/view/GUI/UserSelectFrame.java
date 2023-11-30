@@ -1,9 +1,7 @@
 package easyLearning.view.GUI;
 
 import com.holub.database.Database;
-import easyLearning.controller.DropColumnListener;
-import easyLearning.controller.DropNanListener;
-import easyLearning.controller.ImportListener;
+import easyLearning.controller.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -12,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static easyLearning.view.GUI.FileTypeFilter.createTableFromCSV;
 
@@ -52,14 +52,7 @@ public class UserSelectFrame extends JFrame{
         importButton.addActionListener(new ImportListener(this));
         dropColumnButton.addActionListener(new DropColumnListener(this, table1));
         dropNANButton.addActionListener(new DropNanListener(this));
-        submitButton.addActionListener(e -> {
-            try {
-                new ResultFrame(file);
-            } catch (Exception exception) {
-                JOptionPane.showMessageDialog(null, "잘못된 접근입니다");
-            }
-
-        });
+        submitButton.addActionListener(new SubmitListener());
     }
 
     public void setPleaseInsertFileFormatTextArea(String text){
@@ -97,13 +90,23 @@ public class UserSelectFrame extends JFrame{
     private void populateDropdown() {
         // 텍스트 파일을 읽어와서 드롭다운 버튼에 추가
         String filePath = "src/easyLearning/model/parsing/DistanceMeasurement.txt";
+
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 DMComboBox.addItem(line);
             }
+            //DMComboBox.addActionListener(new DistanceMeasurementListener());
+            // 이벤트 리스너 등록
+            DMComboBox.addActionListener(new DMListener(this, DMComboBox));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+
 }
+
+
