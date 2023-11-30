@@ -31,10 +31,14 @@ public class DatasetExporter implements Table.Exporter {
 
             if (datum != null && columnLine != true) out.write(datum.toString());
 
-            if (--i > 0) out.write(",\t");
+            if (--i > 0 && columnLine != true) out.write(",\t");
         }
-        if(columnLine == true) columnLine = false;
-        out.write("\n");
+        if(columnLine == true) {
+            columnLine = false;
+        } else {
+            out.write("\n");
+        }
+
     }
 
     public void startTable() throws IOException {/*nothing to do*/}
