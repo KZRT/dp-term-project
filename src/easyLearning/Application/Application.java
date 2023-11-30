@@ -6,9 +6,8 @@ import easyLearning.view.GUI.UserSelectFrame;
 
 public class Application {
     public static void main(String[] args) {
-
-        UserSelectFrame userSelectFrame = new UserSelectFrame();
         ClusteringFacade model = new ClusteringFacade();
+        UserSelectFrame userSelectFrame = new UserSelectFrame();
         UserSelectController userSelectController = UserSelectController.getInstance(model, userSelectFrame);
     }
 }

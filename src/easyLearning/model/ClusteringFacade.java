@@ -5,6 +5,9 @@ import net.sf.javaml.clustering.evaluation.*;
 import net.sf.javaml.core.Dataset;
 import net.sf.javaml.distance.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class ClusteringFacade {
     private Clusterer clusterer = null;
     private ClustererFactory clustererFactory;
@@ -179,5 +182,22 @@ public class ClusteringFacade {
             }
         }
         return scores;
+    }
+
+    public ClusteringResult getBestClustering(Dataset data, int iterations) {
+        if(this.clusterEvaluation == null) {
+            throw new NullPointerException("Set cluster evaluation first!");
+        }
+
+        ArrayList<ClusteringResult> results = new ArrayList<>();
+        for (int i = 0; i < iterations; i++) {
+            Dataset[] clusters = this.clusterer.cluster(data);
+            double score = this.clusterEvaluation.score(clusters);
+            results.add(new ClusteringResult(this.clusterer.toString(), this.clusterEvaluation.toString(), clusters, score));
+        }
+
+        Collections.sort(results);
+        System.out.println(results.get(0).toString());
+        return results.get(0);
     }
 }

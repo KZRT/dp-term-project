@@ -1,5 +1,6 @@
 package easyLearning.controller;
 
+import easyLearning.model.ClusteringFacade;
 import easyLearning.view.GUI.UserSelectFrame;
 
 import javax.swing.*;
@@ -12,7 +13,7 @@ public class DropNanListener implements ActionListener {
 
     public DropNanListener(UserSelectFrame userSelectFrame) {
         this.userSelectFrame = userSelectFrame;
-        this.controller = UserSelectController.getInstance(null, userSelectFrame);
+        this.controller = UserSelectController.getInstance(new ClusteringFacade(), userSelectFrame);
     }
     @Override
     public void actionPerformed(ActionEvent actionEvent) {

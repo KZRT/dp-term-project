@@ -1,9 +1,6 @@
 package easyLearning.controller;
 
-import easyLearning.model.ClusteringFacade;
-import easyLearning.model.DistanceMeasureFactory;
-import easyLearning.model.EnumClusterEvaluationFactory;
-import easyLearning.model.EnumClustererFactory;
+import easyLearning.model.*;
 import easyLearning.view.GUI.UserSelectFrame;
 import com.holub.database.*;
 import net.sf.javaml.core.Dataset;
@@ -13,6 +10,7 @@ import net.sf.javaml.tools.data.FileHandler;
 import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class UserSelectController implements Controller {
     private static UserSelectController userSelectController;
@@ -24,8 +22,11 @@ public class UserSelectController implements Controller {
     private String distanceMeasure;
 
     private File file;
+
     private UserSelectController(ClusteringFacade model, UserSelectFrame view) {
-        this.model = model;
+
+        this.model = new ClusteringFacade();
+        System.out.println("UserSelectController " + this.model);
         this.view = view;
         database = new Database();
 
@@ -80,26 +81,43 @@ public class UserSelectController implements Controller {
         selectedEvaluations.remove(evaluation);
     }
 
-    public void startClustering() throws IOException {
-        Dataset[][] clusteringResults = new Dataset[selectedMethods.size()][];
-        Dataset dataset = FileHandler.loadDataset(file, 0, ",");
-        double[][] scores = new double[selectedMethods.size()][selectedEvaluations.size()];
+    public void startClustering() {
+        Dataset dataset;
+        try {
+            System.out.println(file);
+            dataset = FileHandler.loadDataset(file, 0, ",");
+        } catch (IOException e) {
+            throw new NullPointerException("Dataset is null");
+        }
+        ArrayList<ClusteringResult> results = new ArrayList<>();
+        System.out.println(distanceMeasure);
         model.setDistanceMeasure(distanceMeasure);
         for (String method : selectedMethods) {
-            for (String evaluation : selectedEvaluations) {
-                model.setClusterer(method);
-                model.setClusterEvaluation(evaluation);
-                clusteringResults[selectedMethods.indexOf(method)] = model.cluster(dataset);
-                scores[selectedMethods.indexOf(method)][selectedEvaluations.indexOf(evaluation)] = model.score(clusteringResults[selectedMethods.indexOf(method)]);
+            if (method.equals("KMeans") || method.equals("KMedoids") || method.equals("FarthestFirst")) {
+                System.out.println(method);
+                for (int clusterCount = 2; clusterCount < 10; clusterCount++) {
+                    model.setClusterSize(clusterCount);
+                    for (String evaluation : selectedEvaluations) {
+                        System.out.println(evaluation);
+                        model.setClusterEvaluation(evaluation);
+                        model.setClusterer(method);
+                        System.out.println("Start Clustering");
+                        ClusteringResult clusteringResult = model.getBestClustering(dataset, 200);
+                        clusteringResult.setMethod(clusteringResult.getMethod() + "-" + clusterCount);
+                        results.add(clusteringResult);
+                    }
+                }
+            } else {
+                for (String evaluation : selectedEvaluations) {
+                    model.setClusterEvaluation(evaluation);
+                    model.setClusterer(method);
+                    ClusteringResult clusteringResult = model.getBestClustering(dataset, 200);
+                    results.add(clusteringResult);
+                }
             }
         }
-        System.out.println("Scores: " + scores);
-        for (int i = 0; i < scores.length; i++) {
-            System.out.println("Method: " + selectedMethods.get(i));
-            for (int j = 0; j < scores[i].length; j++) {
-                System.out.println("Evaluation: " + selectedEvaluations.get(j));
-                System.out.println("Score: " + scores[i][j]);
-            }
+        for (ClusteringResult result : results) {
+            System.out.println(result);
         }
     }
 
